@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "types": ["bun-types"],
+    "baseUrl": "./src",
+    "paths": {
+      "@update-manager/*": ["./*"],
+      "@update-manager/providers": ["./providers/index.ts"],
+      "@update-manager/providers/*": ["./providers/*"],
+      "@update-manager/types": ["./types.ts"],
+      "@update-manager/config": ["./config.ts"],
+      "@update-manager/runner": ["./runner.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "bin"]
+}
