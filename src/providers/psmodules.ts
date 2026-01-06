@@ -1,6 +1,6 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
-import { commandExists, runPowerShell } from "../runner";
+import { commandExists, runCommand, runPowerShell } from "../runner";
 
 export class PsModulesProvider extends BaseProvider {
   id = "psmodules";
@@ -56,55 +56,44 @@ export class PsModulesProvider extends BaseProvider {
     return updates;
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
-    // Step 1: Install the new version
-    // Using Install-Module with -Force will install the latest version
-    // even if an older version is loaded (installs side-by-side)
-    const installScript = `
-      $ErrorActionPreference = 'Stop'
-      try {
-        Install-Module -Name "${packageId}" -Force -AllowClobber -SkipPublisherCheck -ErrorAction Stop
-        Write-Output "INSTALL_SUCCESS"
-      } catch {
-        Write-Output "INSTALL_ERROR: $($_.Exception.Message)"
-      }
-    `;
+  private async installViaCmd(shell: "pwsh" | "powershell", moduleName: string): Promise<boolean> {
+    // Run Install-Module from cmd.exe to bypass module being loaded in current session
+    const psCommand = `Install-Module -Name '${moduleName}' -Force -AllowClobber -SkipPublisherCheck -ErrorAction Stop; Write-Host 'SUCCESS'`;
+    const result = await runCommand(
+      ["cmd.exe", "/c", shell, "-NoProfile", "-NonInteractive", "-Command", psCommand],
+      { timeout: 180000 }
+    );
+    return result.stdout.includes("SUCCESS");
+  }
 
-    const installResult = await runPowerShell(installScript, { timeout: 180000 });
-
-    if (!installResult.stdout.includes("INSTALL_SUCCESS")) {
-      return false;
-    }
-
-    // Step 2: Clean up old versions
-    // Get all versions except the latest and uninstall them
-    // Note: Can't uninstall a version that's currently loaded in any session
+  private async cleanupOldVersions(moduleName: string): Promise<void> {
+    // Try to remove old versions (best effort)
     const cleanupScript = `
       $ErrorActionPreference = 'SilentlyContinue'
-      $allVersions = Get-InstalledModule -Name "${packageId}" -AllVersions |
+      $allVersions = Get-InstalledModule -Name "${moduleName}" -AllVersions 2>$null |
         Sort-Object { [version]($_.Version -replace '-.*','') } -Descending
 
       if ($allVersions.Count -gt 1) {
-        $latest = $allVersions[0]
         $oldVersions = $allVersions | Select-Object -Skip 1
-
         foreach ($old in $oldVersions) {
-          try {
-            Uninstall-Module -Name "${packageId}" -RequiredVersion $old.Version -Force -ErrorAction Stop
-            Write-Output "REMOVED: $($old.Version)"
-          } catch {
-            Write-Output "SKIP: $($old.Version) - $($_.Exception.Message)"
-          }
+          Uninstall-Module -Name "${moduleName}" -RequiredVersion $old.Version -Force 2>$null
         }
       }
-      Write-Output "CLEANUP_DONE"
     `;
-
     await runPowerShell(cleanupScript, { timeout: 60000 });
+  }
 
-    // We consider success based on install, not cleanup
-    // (cleanup may fail for modules in use, which is expected)
-    return true;
+  async updatePackage(packageId: string): Promise<boolean> {
+    // Install via cmd.exe -> pwsh (bypasses module being loaded)
+    const pwshSuccess = await this.installViaCmd("pwsh", packageId);
+
+    // Also update in Windows PowerShell for consistency
+    await this.installViaCmd("powershell", packageId);
+
+    // Try to cleanup old versions
+    await this.cleanupOldVersions(packageId);
+
+    return pwshSuccess;
   }
 
   async updateAll(): Promise<{
