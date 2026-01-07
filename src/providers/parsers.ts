@@ -114,14 +114,15 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
 
 /**
  * Parse Proto outdated output
+ * Format: "tool - current -> latest" or "tool current → latest"
  */
 export function parseProtoOutput(output: string): ParsedPackage[] {
   const updates: ParsedPackage[] = [];
   const lines = output.split("\n").filter((l) => l.trim());
 
   for (const line of lines) {
-    // Format: "tool current -> latest"
-    const match = line.match(/^(\S+)\s+(\S+)\s+->\s+(\S+)/);
+    // Format: "tool - current -> latest" or similar variations
+    const match = line.match(/^(\w+)\s*[-–]?\s*([\d.]+)\s*(?:->|→)\s*([\d.]+)/);
     if (match) {
       const [, tool, current, latest] = match;
       updates.push({
@@ -162,6 +163,37 @@ export function parseNpmJsonOutput(
     }
   } catch {
     // JSON parse failed, return empty
+  }
+
+  return updates;
+}
+
+/**
+ * Parse pnpm table output (fallback when JSON fails)
+ */
+export function parsePnpmTableOutput(output: string): ParsedPackage[] {
+  const updates: ParsedPackage[] = [];
+  const lines = output.split("\n");
+
+  for (const line of lines) {
+    // Skip header and separator lines
+    if (!line.trim() || line.includes("Package") || line.startsWith("─")) {
+      continue;
+    }
+
+    const parts = line.split(/\s+/).filter(Boolean);
+    if (parts.length >= 3) {
+      const [name, current, , latest] = parts;
+      if (current !== latest && latest) {
+        updates.push({
+          id: name,
+          name,
+          currentVersion: current,
+          newVersion: latest,
+          status: "available",
+        });
+      }
+    }
   }
 
   return updates;

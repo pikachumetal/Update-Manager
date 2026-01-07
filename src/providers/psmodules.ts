@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
 import { commandExists, runCommand, runPowerShell } from "../runner";
+import { parsePsModulesOutput } from "./parsers";
 
 export class PsModulesProvider extends BaseProvider {
   id = "psmodules";
@@ -13,12 +14,9 @@ export class PsModulesProvider extends BaseProvider {
   }
 
   async checkUpdates(): Promise<PackageUpdate[]> {
-    // Get all installed modules with their highest version
-    // and compare with online versions
     const script = `
       $ErrorActionPreference = 'SilentlyContinue'
       $modules = Get-InstalledModule | Group-Object Name | ForEach-Object {
-        # Sort by cleaned version (remove prerelease suffix) to get the actual highest
         $_.Group | Sort-Object { [version]($_.Version -replace '-.*','') } -Descending | Select-Object -First 1
       }
       foreach ($module in $modules) {
@@ -39,25 +37,13 @@ export class PsModulesProvider extends BaseProvider {
       return [];
     }
 
-    return this.parsePsOutput(result.stdout);
-  }
-
-  private parsePsOutput(output: string): PackageUpdate[] {
-    const updates: PackageUpdate[] = [];
-    const lines = output.split("\n").filter((l) => l.trim());
-
-    for (const line of lines) {
-      const [name, current, latest] = line.split("|").map((s) => s.trim());
-      if (name && current && latest) {
-        updates.push(this.createUpdate(name, name, current, latest));
-      }
-    }
-
-    return updates;
+    const parsed = parsePsModulesOutput(result.stdout);
+    return parsed.map((pkg) =>
+      this.createUpdate(pkg.id, pkg.name, pkg.currentVersion, pkg.newVersion)
+    );
   }
 
   private async installViaCmd(shell: "pwsh" | "powershell", moduleName: string): Promise<boolean> {
-    // Run Install-Module from cmd.exe to bypass module being loaded in current session
     const psCommand = `Install-Module -Name '${moduleName}' -Force -AllowClobber -SkipPublisherCheck -ErrorAction Stop; Write-Host 'SUCCESS'`;
     const result = await runCommand(
       ["cmd.exe", "/c", shell, "-NoProfile", "-NonInteractive", "-Command", psCommand],
@@ -67,7 +53,6 @@ export class PsModulesProvider extends BaseProvider {
   }
 
   private async cleanupOldVersions(moduleName: string): Promise<void> {
-    // Try to remove old versions (best effort)
     const cleanupScript = `
       $ErrorActionPreference = 'SilentlyContinue'
       $allVersions = Get-InstalledModule -Name "${moduleName}" -AllVersions 2>$null |
@@ -84,15 +69,9 @@ export class PsModulesProvider extends BaseProvider {
   }
 
   async updatePackage(packageId: string): Promise<boolean> {
-    // Install via cmd.exe -> pwsh (bypasses module being loaded)
     const pwshSuccess = await this.installViaCmd("pwsh", packageId);
-
-    // Also update in Windows PowerShell for consistency
     await this.installViaCmd("powershell", packageId);
-
-    // Try to cleanup old versions
     await this.cleanupOldVersions(packageId);
-
     return pwshSuccess;
   }
 

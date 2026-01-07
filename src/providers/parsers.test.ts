@@ -3,6 +3,7 @@ import {
   parseWingetOutput,
   parseProtoOutput,
   parseNpmJsonOutput,
+  parsePnpmTableOutput,
   parsePsModulesOutput,
   isNewerVersion,
 } from "./parsers";
@@ -156,6 +157,37 @@ describe("parseNpmJsonOutput", () => {
   test("handles empty JSON object", () => {
     const output = "{}";
     const result = parseNpmJsonOutput(output, "npm");
+    expect(result).toHaveLength(0);
+  });
+});
+
+describe("parsePnpmTableOutput", () => {
+  test("parses pnpm table output", () => {
+    const output = `Package     Current   Wanted    Latest
+─────────────────────────────────────────
+typescript  5.2.0     5.3.0     5.3.0
+eslint      8.50.0    8.56.0    8.56.0`;
+
+    const result = parsePnpmTableOutput(output);
+
+    expect(result).toHaveLength(2);
+    expect(result[0].id).toBe("typescript");
+    expect(result[0].currentVersion).toBe("5.2.0");
+    expect(result[0].newVersion).toBe("5.3.0");
+  });
+
+  test("skips header and separator lines", () => {
+    const output = `Package     Current   Wanted    Latest
+─────────────────────────────────────────
+lodash      4.17.21   4.17.21   4.17.21`;
+
+    const result = parsePnpmTableOutput(output);
+    // lodash has same current and latest, should be skipped
+    expect(result).toHaveLength(0);
+  });
+
+  test("handles empty output", () => {
+    const result = parsePnpmTableOutput("");
     expect(result).toHaveLength(0);
   });
 });

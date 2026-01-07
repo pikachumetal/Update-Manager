@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
 import { commandExists, runCommand } from "../runner";
+import { parseProtoOutput } from "./parsers";
 
 export class ProtoProvider extends BaseProvider {
   id = "proto";
@@ -18,29 +19,13 @@ export class ProtoProvider extends BaseProvider {
       return [];
     }
 
-    return this.parseProtoOutput(result.stdout);
-  }
-
-  private parseProtoOutput(output: string): PackageUpdate[] {
-    const updates: PackageUpdate[] = [];
-    const lines = output.split("\n");
-
-    for (const line of lines) {
-      // Format: "tool - current -> latest" or similar
-      // Example: "node - 20.0.0 -> 22.0.0"
-      const match = line.match(/^(\w+)\s*[-–]\s*([\d.]+)\s*(?:->|→)\s*([\d.]+)/);
-
-      if (match) {
-        const [, tool, currentVersion, newVersion] = match;
-        updates.push(this.createUpdate(tool, tool, currentVersion, newVersion));
-      }
-    }
-
-    return updates;
+    const parsed = parseProtoOutput(result.stdout);
+    return parsed.map((pkg) =>
+      this.createUpdate(pkg.id, pkg.name, pkg.currentVersion, pkg.newVersion)
+    );
   }
 
   async updatePackage(packageId: string): Promise<boolean> {
-    // Proto uses "proto install <tool>" to update to the pinned/latest version
     const result = await runCommand(["proto", "install", packageId], {
       timeout: 120000,
     });
@@ -53,7 +38,6 @@ export class ProtoProvider extends BaseProvider {
     failed: string[];
     skipped: string[];
   }> {
-    // First get all outdated tools
     const updates = await this.checkUpdates();
     const result = {
       success: true,
