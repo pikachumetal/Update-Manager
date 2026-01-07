@@ -82,8 +82,8 @@ async function interactiveMode() {
     });
 
     if (p.isCancel(action) || action === "exit") {
-      p.outro(pc.dim("Goodbye!"));
-      break;
+      p.outro("Bye! 👋");
+      process.exit(0);
     }
 
     switch (action) {
