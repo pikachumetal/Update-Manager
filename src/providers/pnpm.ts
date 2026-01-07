@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
 import { commandExists, runCommand } from "../runner";
+import { parseNpmJsonOutput, parsePnpmTableOutput } from "./parsers";
 
 export class PnpmProvider extends BaseProvider {
   id = "pnpm";
@@ -20,49 +21,15 @@ export class PnpmProvider extends BaseProvider {
       return [];
     }
 
-    try {
-      const outdated = JSON.parse(result.stdout);
-      return this.parsePnpmOutput(outdated);
-    } catch {
-      // Try parsing as table if JSON fails
-      return this.parseTableOutput(result.stdout);
-    }
-  }
-
-  private parsePnpmOutput(
-    outdated: Record<string, { current: string; wanted: string; latest: string }>
-  ): PackageUpdate[] {
-    const updates: PackageUpdate[] = [];
-
-    for (const [name, info] of Object.entries(outdated)) {
-      if (info.current !== info.latest) {
-        updates.push(this.createUpdate(name, name, info.current, info.latest));
-      }
+    // Try JSON first, fallback to table parsing
+    let parsed = parseNpmJsonOutput(result.stdout, this.id);
+    if (parsed.length === 0 && result.stdout.trim()) {
+      parsed = parsePnpmTableOutput(result.stdout);
     }
 
-    return updates;
-  }
-
-  private parseTableOutput(output: string): PackageUpdate[] {
-    const updates: PackageUpdate[] = [];
-    const lines = output.split("\n");
-
-    for (const line of lines) {
-      // Skip header and empty lines
-      if (!line.trim() || line.includes("Package") || line.startsWith("─")) {
-        continue;
-      }
-
-      const parts = line.split(/\s+/).filter(Boolean);
-      if (parts.length >= 3) {
-        const [name, current, , latest] = parts;
-        if (current !== latest && latest) {
-          updates.push(this.createUpdate(name, name, current, latest));
-        }
-      }
-    }
-
-    return updates;
+    return parsed.map((pkg) =>
+      this.createUpdate(pkg.id, pkg.name, pkg.currentVersion, pkg.newVersion)
+    );
   }
 
   async updatePackage(packageId: string): Promise<boolean> {
