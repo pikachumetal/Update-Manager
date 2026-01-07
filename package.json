@@ -1,20 +1,28 @@
 {
   "name": "@pikachu-metal/update-manager",
-  "version": "1.1.1",
-  "description": "Interactive CLI tool for managing and launching development projects",
+  "version": "1.1.2",
+  "description": "Interactive CLI to manage updates from multiple package managers (WinGet, Proto, npm, pnpm, Bun, PowerShell Modules, etc.)",
   "author": "Àngel Delgado Fernández",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pikachumetal/update-manager.git"
   },
+  "bugs": {
+    "url": "https://github.com/pikachumetal/update-manager/issues"
+  },
+  "homepage": "https://github.com/pikachumetal/update-manager#readme",
   "keywords": [
     "cli",
     "update-manager",
-    "launcher",
-    "dev-tools",
+    "winget",
+    "proto",
+    "npm",
+    "pnpm",
+    "bun",
+    "powershell",
     "windows",
-    "powershell"
+    "package-manager"
   ],
   "type": "module",
   "bin": {
@@ -29,7 +37,10 @@
   "scripts": {
     "start": "bun run src/index.ts",
     "dev": "bun --watch run src/index.ts",
-    "build": "bun build src/index.ts --compile --outfile bin/update-manager.exe"
+    "build": "bun build src/index.ts --compile --outfile bin/update-manager.exe",
+    "link": "bun link",
+    "test": "bun test",
+    "test:watch": "bun test --watch"
   },
   "dependencies": {
     "@clack/prompts": "^0.11.0",
@@ -39,10 +50,7 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^25.0.3",
-    "tsx": "^4.21.0"
-  },
-  "peerDependencies": {
-    "typescript": "latest"
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18",

@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
 import { commandExists, runCommand } from "../runner";
+import { parseNpmJsonOutput } from "./parsers";
 
 export class NpmProvider extends BaseProvider {
   id = "npm";
@@ -21,26 +22,10 @@ export class NpmProvider extends BaseProvider {
       return [];
     }
 
-    try {
-      const outdated = JSON.parse(result.stdout);
-      return this.parseNpmOutput(outdated);
-    } catch {
-      return [];
-    }
-  }
-
-  private parseNpmOutput(
-    outdated: Record<string, { current: string; wanted: string; latest: string }>
-  ): PackageUpdate[] {
-    const updates: PackageUpdate[] = [];
-
-    for (const [name, info] of Object.entries(outdated)) {
-      if (info.current !== info.latest) {
-        updates.push(this.createUpdate(name, name, info.current, info.latest));
-      }
-    }
-
-    return updates;
+    const parsed = parseNpmJsonOutput(result.stdout, this.id);
+    return parsed.map((pkg) =>
+      this.createUpdate(pkg.id, pkg.name, pkg.currentVersion, pkg.newVersion)
+    );
   }
 
   async updatePackage(packageId: string): Promise<boolean> {
