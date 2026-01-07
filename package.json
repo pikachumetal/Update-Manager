@@ -1,6 +1,6 @@
 {
   "name": "@pikachu-metal/update-manager",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Interactive CLI tool for managing and launching development projects",
   "author": "Àngel Delgado Fernández",
   "license": "MIT",
