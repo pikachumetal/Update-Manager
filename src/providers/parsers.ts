@@ -17,95 +17,120 @@ export interface ParsedPackage {
 
 /**
  * Parse WinGet upgrade output
+ * Handles multiple sections (available updates and pinned packages)
  */
 export function parseWingetOutput(output: string): ParsedPackage[] {
   const updates: ParsedPackage[] = [];
-  const lines = output.split("\n");
 
-  // Detect pinned packages from messages
-  const hasPinnedMessage =
-    output.includes("pin that needs to be removed") ||
-    output.includes("pins that prevent upgrade");
+  // Clean up control characters and normalize line endings
+  const cleanedOutput = output
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
 
-  // Find header line (contains "Name" and "Id" and "Version")
-  let headerIndex = -1;
-  let headerLine = "";
+  const lines = cleanedOutput.split("\n");
+
+  // Find all sections (each section has a header followed by separator ---)
+  const sections: { headerIndex: number; separatorIndex: number; isPinned: boolean }[] = [];
 
   for (let i = 0; i < lines.length; i++) {
-    if (
-      lines[i].includes("Name") &&
-      lines[i].includes("Id") &&
-      lines[i].includes("Version")
-    ) {
-      headerIndex = i;
-      headerLine = lines[i];
-      break;
+    const line = lines[i].trim();
+    // Look for separator line (at least 10 dashes)
+    if (line.match(/^-{10,}$/)) {
+      if (i > 0) {
+        const headerLine = lines[i - 1];
+        // Verify it's a valid header
+        if (
+          headerLine.includes("Name") &&
+          headerLine.includes("Id") &&
+          headerLine.includes("Version")
+        ) {
+          // Check if this section is for pinned packages
+          // Look at lines before the header for "pin" message
+          let isPinned = false;
+          for (let j = Math.max(0, i - 5); j < i - 1; j++) {
+            if (lines[j].includes("pin") || lines[j].includes("Pin")) {
+              isPinned = true;
+              break;
+            }
+          }
+          sections.push({ headerIndex: i - 1, separatorIndex: i, isPinned });
+        }
+      }
     }
   }
 
-  if (headerIndex === -1) return updates;
+  // Parse each section
+  for (let s = 0; s < sections.length; s++) {
+    const section = sections[s];
+    const headerLine = lines[section.headerIndex];
 
-  // Find column positions from header
-  const nameCol = headerLine.indexOf("Name");
-  const idCol = headerLine.indexOf("Id");
-  const versionCol = headerLine.indexOf("Version");
-  const availableCol = headerLine.indexOf("Available");
-  const sourceCol = headerLine.indexOf("Source");
+    // Find column positions from header
+    const nameCol = headerLine.indexOf("Name");
+    const idCol = headerLine.indexOf("Id");
+    const versionCol = headerLine.indexOf("Version");
+    const availableCol = headerLine.indexOf("Available");
+    const sourceCol = headerLine.indexOf("Source");
 
-  // Skip separator line (---)
-  const dataStart = headerIndex + 2;
+    // Data starts after separator
+    const dataStart = section.separatorIndex + 1;
 
-  for (let i = dataStart; i < lines.length; i++) {
-    const line = lines[i];
+    // Data ends at next section's "pin" message, empty line, or summary line
+    const nextSectionStart = s + 1 < sections.length ? sections[s + 1].headerIndex - 3 : lines.length;
 
-    // Skip empty lines and summary lines
-    if (
-      !line.trim() ||
-      line.includes("upgrade(s) available") ||
-      line.includes("upgrades available") ||
-      line.includes("package(s) have")
-    ) {
-      continue;
-    }
+    for (let i = dataStart; i < nextSectionStart; i++) {
+      const line = lines[i];
 
-    // Extract columns based on positions
-    const name = line.substring(nameCol, idCol).trim();
-    const id = line.substring(idCol, versionCol).trim();
-    const currentVersion = line.substring(versionCol, availableCol).trim();
-    const newVersion =
-      sourceCol > 0
-        ? line.substring(availableCol, sourceCol).trim()
-        : line.substring(availableCol).trim();
-    const source = sourceCol > 0 ? line.substring(sourceCol).trim() : undefined;
+      // Stop at empty lines, summary lines, or pin messages
+      if (
+        !line.trim() ||
+        line.includes("upgrade(s) available") ||
+        line.includes("upgrades available") ||
+        line.includes("package(s) have") ||
+        line.includes("pin that needs") ||
+        line.includes("pins that prevent")
+      ) {
+        break;
+      }
 
-    if (!id || !newVersion) continue;
+      // Skip separator lines
+      if (line.trim().match(/^-+$/)) continue;
 
-    // Determine status
-    let status: PackageStatus = "available";
-    let notes: string | undefined;
+      // Extract columns based on positions
+      const name = line.substring(nameCol, idCol).trim();
+      const id = line.substring(idCol, versionCol).trim();
+      const currentVersion = line.substring(versionCol, availableCol).trim();
+      const newVersion =
+        sourceCol > 0
+          ? line.substring(availableCol, sourceCol).trim()
+          : line.substring(availableCol).trim();
+      const source = sourceCol > 0 ? line.substring(sourceCol).trim() : undefined;
 
-    // Check for unknown version
-    if (currentVersion.toLowerCase() === "unknown" || !currentVersion) {
-      status = "unknown";
-      notes = "Current version unknown";
-    }
+      if (!id || !newVersion) continue;
 
-    // Check if package is pinned
-    if (hasPinnedMessage && i < dataStart + 5) {
-      status = "pinned";
-      notes = "Package is pinned";
-    }
+      // Skip if id looks like header text
+      if (id === "Id" || name === "Name") continue;
 
-    if (currentVersion !== newVersion) {
-      updates.push({
-        id,
-        name: name || id,
-        currentVersion: currentVersion || "unknown",
-        newVersion,
-        status,
-        source,
-        notes,
-      });
+      // Determine status
+      let status: PackageStatus = section.isPinned ? "pinned" : "available";
+      let notes: string | undefined = section.isPinned ? "Package is pinned" : undefined;
+
+      // Check for unknown version
+      if (currentVersion.toLowerCase() === "unknown" || !currentVersion) {
+        status = "unknown";
+        notes = "Current version unknown";
+      }
+
+      if (currentVersion !== newVersion) {
+        updates.push({
+          id,
+          name: name || id,
+          currentVersion: currentVersion || "unknown",
+          newVersion,
+          status,
+          source,
+          notes,
+        });
+      }
     }
   }
 
