@@ -15,12 +15,16 @@ export async function runCommand(
     shell?: boolean;
   } = {}
 ): Promise<CommandResult> {
-  const { timeout = 60000, cwd, shell = false } = options;
+  const { timeout = 60000, cwd } = options;
 
   try {
-    const [command, ...args] = cmd;
+    // On Windows, run through cmd.exe to properly resolve WindowsApps aliases
+    const isWindows = process.platform === "win32";
+    const spawnArgs = isWindows
+      ? ["cmd.exe", "/c", ...cmd]
+      : cmd;
 
-    const proc = Bun.spawn([command, ...args], {
+    const proc = Bun.spawn(spawnArgs, {
       cwd,
       stdout: "pipe",
       stderr: "pipe",
