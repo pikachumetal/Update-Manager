@@ -1,5 +1,5 @@
 import { BaseProvider } from "./base";
-import type { PackageUpdate } from "../types";
+import type { PackageUpdate, UpdateOptions } from "../types";
 import { commandExists, runCommand } from "../runner";
 import { parseWingetOutput } from "./parsers";
 
@@ -9,8 +9,17 @@ export class WingetProvider extends BaseProvider {
   icon = "📦";
   requiresAdmin = true;
 
+  private gsudoAvailable: boolean | null = null;
+
   async isAvailable(): Promise<boolean> {
     return commandExists("winget");
+  }
+
+  private async hasGsudo(): Promise<boolean> {
+    if (this.gsudoAvailable === null) {
+      this.gsudoAvailable = await commandExists("gsudo");
+    }
+    return this.gsudoAvailable;
   }
 
   async checkUpdates(): Promise<PackageUpdate[]> {
@@ -33,17 +42,27 @@ export class WingetProvider extends BaseProvider {
     );
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
-    const result = await runCommand(
-      [
-        "winget", "upgrade",
-        "--id", packageId,
-        "--silent",
-        "--accept-package-agreements",
-        "--accept-source-agreements"
-      ],
-      { timeout: 300000 }
-    );
+  async updatePackage(packageId: string, options?: UpdateOptions): Promise<boolean> {
+    const wingetArgs = [
+      "winget", "upgrade",
+      "--id", packageId,
+      "--silent",
+      "--accept-package-agreements",
+      "--accept-source-agreements"
+    ];
+
+    if (options?.force) {
+      wingetArgs.push("--force");
+    }
+
+    // First try without elevation
+    let result = await runCommand(wingetArgs, { timeout: 300000 });
+
+    // If failed and force is enabled, retry with gsudo
+    if (!result.success && options?.force && await this.hasGsudo()) {
+      result = await runCommand(["gsudo", ...wingetArgs], { timeout: 300000 });
+    }
+
     return result.success;
   }
 

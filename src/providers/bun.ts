@@ -25,7 +25,7 @@ export class BunProvider extends BaseProvider {
     return [];
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     if (packageId === "bun") {
       // Update bun itself
       const result = await runCommand(["bun", "upgrade"], { timeout: 120000 });
