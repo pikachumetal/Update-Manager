@@ -34,6 +34,10 @@ export interface UpdateResult {
   skipped: string[];
 }
 
+export interface UpdateOptions {
+  force?: boolean;
+}
+
 export interface UpdateProvider {
   id: string;
   name: string;
@@ -42,7 +46,7 @@ export interface UpdateProvider {
 
   isAvailable(): Promise<boolean>;
   checkUpdates(): Promise<PackageUpdate[]>;
-  updatePackage(packageId: string): Promise<boolean>;
+  updatePackage(packageId: string, options?: UpdateOptions): Promise<boolean>;
   updateAll(): Promise<UpdateResult>;
 }
 

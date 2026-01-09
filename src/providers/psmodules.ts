@@ -68,7 +68,7 @@ export class PsModulesProvider extends BaseProvider {
     await runPowerShell(cleanupScript, { timeout: 60000 });
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     const pwshSuccess = await this.installViaCmd("pwsh", packageId);
     await this.installViaCmd("powershell", packageId);
     await this.cleanupOldVersions(packageId);

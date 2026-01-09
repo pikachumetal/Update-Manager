@@ -28,7 +28,7 @@ export class NpmProvider extends BaseProvider {
     );
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     const result = await runCommand(["npm", "update", "-g", packageId], {
       timeout: 120000,
     });

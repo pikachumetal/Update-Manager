@@ -28,7 +28,7 @@ export class ClaudeProvider extends BaseProvider {
     return match ? match[1] : null;
   }
 
-  async updatePackage(_packageId: string): Promise<boolean> {
+  async updatePackage(_packageId: string, _options?: unknown): Promise<boolean> {
     // `claude update` checks and updates if available
     const result = await runCommand(["claude", "update"], { timeout: 120000 });
     return result.success;
