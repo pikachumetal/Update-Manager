@@ -3,6 +3,7 @@ import * as p from "@clack/prompts";
 import pc from "picocolors";
 import { loadConfig, toggleProvider, updateLastCheck, getEnabledProviders } from "./config";
 import { providers, getAvailableProviders } from "./providers";
+import { commandExists, runCommand } from "./runner";
 import type { PackageUpdate, UpdateProvider } from "./types";
 
 const VERSION = "0.1.0";
@@ -312,36 +313,82 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
 async function performUpdates(updates: PackageUpdate[]) {
   // Separate by status
   const toUpdate = updates.filter(u => u.status === "available");
-  const skipped = updates.filter(u => u.status === "pinned" || u.status === "unknown");
+  const skippable = updates.filter(u => u.status === "pinned" || u.status === "unknown");
 
-  // Show skipped packages
-  if (skipped.length > 0) {
+  // Track packages to force update
+  let forceUpdates: PackageUpdate[] = [];
+  let finalSkipped = skippable;
+
+  // Show skipped packages and ask if user wants to force
+  if (skippable.length > 0) {
     console.log();
-    p.log.warn(`Skipping ${skipped.length} package(s):`);
-    for (const pkg of skipped) {
+    p.log.warn(`Found ${skippable.length} package(s) that require force:`);
+    for (const pkg of skippable) {
       const reason = pkg.status === "pinned" ? "pinned" : "unknown version";
       console.log(`   ${pc.dim("•")} ${pkg.name} ${pc.dim(`(${reason})`)}`);
     }
+
+    // Only ask for WinGet packages (they support --force)
+    const wingetSkippable = skippable.filter(u => u.provider === "winget");
+    if (wingetSkippable.length > 0) {
+      // Check if gsudo is available for elevation
+      const hasGsudo = await commandExists("gsudo");
+
+      if (!hasGsudo) {
+        const installGsudo = await p.confirm({
+          message: `gsudo not found. Install it for admin elevation?`,
+        });
+
+        if (!p.isCancel(installGsudo) && installGsudo) {
+          const spinner = p.spinner();
+          spinner.start("Installing gsudo...");
+          const result = await runCommand(
+            ["winget", "install", "gerardog.gsudo", "--silent", "--accept-package-agreements"],
+            { timeout: 120000 }
+          );
+          if (result.success) {
+            spinner.stop(pc.green("gsudo installed"));
+          } else {
+            spinner.stop(pc.red("Failed to install gsudo"));
+          }
+        }
+      }
+
+      const forceConfirm = await p.confirm({
+        message: `Force update ${wingetSkippable.length} WinGet package(s)?`,
+      });
+
+      if (!p.isCancel(forceConfirm) && forceConfirm) {
+        forceUpdates = wingetSkippable;
+        finalSkipped = skippable.filter(u => u.provider !== "winget");
+      }
+    }
   }
 
-  if (toUpdate.length === 0) {
+  const allToUpdate = [...toUpdate, ...forceUpdates];
+
+  if (allToUpdate.length === 0) {
     p.log.info("No packages to update");
     return;
   }
 
   console.log();
-  p.log.step(`Updating ${toUpdate.length} package(s)...`);
+  p.log.step(`Updating ${allToUpdate.length} package(s)...`);
   console.log();
 
-  const grouped = toUpdate.reduce(
+  // Group by provider, tracking which need force
+  const grouped = allToUpdate.reduce(
     (acc, update) => {
       if (!acc[update.provider]) {
         acc[update.provider] = [];
       }
-      acc[update.provider].push(update);
+      acc[update.provider].push({
+        update,
+        force: forceUpdates.includes(update),
+      });
       return acc;
     },
-    {} as Record<string, PackageUpdate[]>
+    {} as Record<string, { update: PackageUpdate; force: boolean }[]>
   );
 
   let successCount = 0;
@@ -354,13 +401,14 @@ async function performUpdates(updates: PackageUpdate[]) {
     // Show provider header
     console.log(pc.dim(`  ${provider.icon} ${provider.name}`));
 
-    for (const update of providerUpdates) {
+    for (const { update, force } of providerUpdates) {
       const spinner = p.spinner();
       const versionInfo = `${pc.dim(update.currentVersion)} → ${pc.green(update.newVersion)}`;
-      spinner.start(`${update.name} ${versionInfo}`);
+      const forceLabel = force ? pc.yellow(" (force)") : "";
+      spinner.start(`${update.name} ${versionInfo}${forceLabel}`);
 
       try {
-        const success = await provider.updatePackage(update.id);
+        const success = await provider.updatePackage(update.id, { force });
         if (success) {
           spinner.stop(pc.green(`  ✓ ${update.name} ${versionInfo}`));
           successCount++;
@@ -382,7 +430,7 @@ async function performUpdates(updates: PackageUpdate[]) {
   const summaryParts: string[] = [];
   if (successCount > 0) summaryParts.push(pc.green(`✓ ${successCount} updated`));
   if (failCount > 0) summaryParts.push(pc.red(`✗ ${failCount} failed`));
-  if (skipped.length > 0) summaryParts.push(pc.yellow(`⊘ ${skipped.length} skipped`));
+  if (finalSkipped.length > 0) summaryParts.push(pc.yellow(`⊘ ${finalSkipped.length} skipped`));
 
   p.log.info(`Result: ${summaryParts.join(" | ")}`);
 }

@@ -39,7 +39,7 @@ export class ChocolateyProvider extends BaseProvider {
     return updates;
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     const result = await runCommand(
       ["choco", "upgrade", packageId, "-y", "--no-progress"],
       { timeout: 300000 }

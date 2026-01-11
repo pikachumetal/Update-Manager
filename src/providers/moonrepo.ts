@@ -51,7 +51,7 @@ export class MoonrepoProvider extends BaseProvider {
     return match && match.length > 0 ? match[match.length - 1] : null;
   }
 
-  async updatePackage(_packageId: string): Promise<boolean> {
+  async updatePackage(_packageId: string, _options?: unknown): Promise<boolean> {
     const result = await runCommand(["moon", "upgrade"], { timeout: 120000 });
     return result.success;
   }
