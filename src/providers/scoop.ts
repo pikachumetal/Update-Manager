@@ -56,7 +56,7 @@ export class ScoopProvider extends BaseProvider {
     return updates;
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     const result = await runCommand(["scoop", "update", packageId], {
       timeout: 120000,
     });
