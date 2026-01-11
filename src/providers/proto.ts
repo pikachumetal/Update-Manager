@@ -25,7 +25,7 @@ export class ProtoProvider extends BaseProvider {
     );
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     const result = await runCommand(["proto", "install", packageId], {
       timeout: 120000,
     });

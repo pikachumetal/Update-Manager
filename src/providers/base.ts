@@ -1,4 +1,4 @@
-import type { PackageUpdate, PackageStatus, UpdateResult, UpdateProvider } from "../types";
+import type { PackageUpdate, PackageStatus, UpdateResult, UpdateProvider, UpdateOptions } from "../types";
 
 export interface CreateUpdateOptions {
   status?: PackageStatus;
@@ -14,7 +14,7 @@ export abstract class BaseProvider implements UpdateProvider {
 
   abstract isAvailable(): Promise<boolean>;
   abstract checkUpdates(): Promise<PackageUpdate[]>;
-  abstract updatePackage(packageId: string): Promise<boolean>;
+  abstract updatePackage(packageId: string, options?: UpdateOptions): Promise<boolean>;
 
   async updateAll(): Promise<UpdateResult> {
     const updates = await this.checkUpdates();

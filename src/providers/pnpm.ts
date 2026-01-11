@@ -32,7 +32,7 @@ export class PnpmProvider extends BaseProvider {
     );
   }
 
-  async updatePackage(packageId: string): Promise<boolean> {
+  async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
     const result = await runCommand(["pnpm", "update", "-g", packageId], {
       timeout: 120000,
     });
