@@ -1,7 +1,7 @@
 #!/usr/bin/env bun
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { loadConfig, toggleProvider, updateLastCheck, getEnabledProviders } from "./config";
+import { loadConfig, toggleProvider, updateLastCheck, getEnabledProviders, getIgnoredPackages, addIgnoredPackage, removeIgnoredPackage, getInstalledVersions, setInstalledVersion } from "./config";
 import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
 import type { PackageUpdate, UpdateProvider } from "./types";
@@ -28,6 +28,21 @@ async function main() {
     return;
   }
 
+  if (command === "ignore") {
+    await ignoreCommand(args[1]);
+    return;
+  }
+
+  if (command === "unignore") {
+    await unignoreCommand(args[1]);
+    return;
+  }
+
+  if (command === "ignored") {
+    await listIgnoredCommand();
+    return;
+  }
+
   if (command === "--version" || command === "-v") {
     console.log(`um v${VERSION}`);
     return;
@@ -51,6 +66,9 @@ ${pc.dim("Usage:")}
   um check [provider]    Check for updates
   um update [provider]   Update packages
   um providers           Manage providers
+  um ignore <id>         Ignore a package
+  um unignore <id>       Stop ignoring a package
+  um ignored             List ignored packages
 
 ${pc.dim("Options:")}
   -y, --yes             Skip confirmation
@@ -62,6 +80,7 @@ ${pc.dim("Examples:")}
   um check winget       Check only WinGet
   um update --yes       Update all without confirmation
   um providers enable chocolatey
+  um ignore Google.GooglePlayGames
 `);
 }
 
@@ -138,6 +157,8 @@ async function checkCommand(providerId?: string) {
 
 async function checkAllProviders(): Promise<PackageUpdate[]> {
   const enabledIds = await getEnabledProviders();
+  const ignoredPackages = await getIgnoredPackages();
+  const installedVersions = await getInstalledVersions();
   const allUpdates: PackageUpdate[] = [];
 
   const spinner = p.spinner();
@@ -153,7 +174,8 @@ async function checkAllProviders(): Promise<PackageUpdate[]> {
 
     try {
       return await provider.checkUpdates();
-    } catch {
+    } catch (error) {
+      console.warn(pc.yellow(`  ⚠ ${provider.name}: ${error instanceof Error ? error.message : "check failed"}`));
       return [];
     }
   });
@@ -161,7 +183,16 @@ async function checkAllProviders(): Promise<PackageUpdate[]> {
   const results = await Promise.all(checks);
 
   for (const updates of results) {
-    allUpdates.push(...updates);
+    for (const u of updates) {
+      // Skip ignored packages
+      if (ignoredPackages.includes(u.id)) continue;
+
+      // Skip if we already have this version installed (handles version mismatch issues)
+      const savedVersion = installedVersions[u.id];
+      if (savedVersion && savedVersion === u.newVersion) continue;
+
+      allUpdates.push(u);
+    }
   }
 
   spinner.stop(`Found ${allUpdates.length} update(s)`);
@@ -412,6 +443,8 @@ async function performUpdates(updates: PackageUpdate[]) {
         if (success) {
           spinner.stop(pc.green(`  ✓ ${update.name} ${versionInfo}`));
           successCount++;
+          // Save installed version to handle packages with version mismatch issues
+          await setInstalledVersion(update.id, update.newVersion);
         } else {
           spinner.stop(pc.red(`  ✗ ${update.name} failed`));
           failCount++;
@@ -565,6 +598,42 @@ async function providersCommand(action?: string, providerId?: string) {
   }
 
   console.log(`Unknown action: ${action}`);
+}
+
+async function ignoreCommand(packageId?: string) {
+  if (!packageId) {
+    console.log(pc.red("Usage: um ignore <package-id>"));
+    console.log(pc.dim("Example: um ignore Google.GooglePlayGames"));
+    return;
+  }
+
+  await addIgnoredPackage(packageId);
+  console.log(pc.green(`✓ ${packageId} added to ignore list`));
+}
+
+async function unignoreCommand(packageId?: string) {
+  if (!packageId) {
+    console.log(pc.red("Usage: um unignore <package-id>"));
+    return;
+  }
+
+  await removeIgnoredPackage(packageId);
+  console.log(pc.green(`✓ ${packageId} removed from ignore list`));
+}
+
+async function listIgnoredCommand() {
+  const ignored = await getIgnoredPackages();
+
+  if (ignored.length === 0) {
+    console.log(pc.dim("No packages ignored"));
+    return;
+  }
+
+  console.log(pc.bold("\nIgnored packages:\n"));
+  for (const pkg of ignored) {
+    console.log(`  ${pc.dim("•")} ${pkg}`);
+  }
+  console.log();
 }
 
 // Handle Ctrl+C gracefully

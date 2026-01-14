@@ -8,6 +8,9 @@ export const ProviderConfigSchema = z.object({
 export const ConfigSchema = z.object({
   providers: z.record(z.string(), ProviderConfigSchema),
   lastCheck: z.string().optional(),
+  ignoredPackages: z.array(z.string()).optional(),
+  // Track installed versions to detect real updates (useful for packages with version mismatches)
+  installedVersions: z.record(z.string(), z.string()).optional(),
 });
 
 // Types

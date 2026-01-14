@@ -11,22 +11,22 @@ CLI interactivo para gestionar actualizaciones de múltiples gestores de paquete
 
 ## Gestores de Paquetes Soportados
 
-| Gestor | Comando Check | Comando Update | Estado |
-|--------|---------------|----------------|--------|
-| WinGet | `winget upgrade` | `winget upgrade --id <id>` | Activo |
-| Proto | `proto outdated` | `proto install <tool>` | Activo |
-| Moonrepo | `moon upgrade --check` | `moon upgrade` | Activo |
-| PS Modules | `Get-InstalledModule` | `Update-Module` | Activo |
-| Bun (global) | `bun pm ls -g` | `bun update -g` | Activo |
-| npm (global) | `npm outdated -g` | `npm update -g` | Activo |
-| pnpm (global) | `pnpm outdated -g` | `pnpm update -g` | Activo |
-| Claude CLI | `claude --version` | `claude update` | Activo |
-| Chocolatey | `choco outdated` | `choco upgrade` | Desactivado |
-| Scoop | `scoop status` | `scoop update` | Desactivado |
+| Gestor        | Comando Check          | Comando Update             | Estado      |
+| ------------- | ---------------------- | -------------------------- | ----------- |
+| WinGet        | `winget upgrade`       | `winget upgrade --id <id>` | Activo      |
+| Proto         | `proto outdated`       | `proto install <tool>`     | Activo      |
+| Moonrepo      | `moon upgrade --check` | `moon upgrade`             | Activo      |
+| PS Modules    | `Get-InstalledModule`  | `Update-Module`            | Activo      |
+| Bun (global)  | `bun pm ls -g`         | `bun update -g`            | Activo      |
+| npm (global)  | `npm outdated -g`      | `npm update -g`            | Activo      |
+| pnpm (global) | `pnpm outdated -g`     | `pnpm update -g`           | Activo      |
+| Claude CLI    | `claude --version`     | `claude update`            | Activo      |
+| Chocolatey    | `choco outdated`       | `choco upgrade`            | Desactivado |
+| Scoop         | `scoop status`         | `scoop update`             | Desactivado |
 
 ## Estructura del Proyecto
 
-```
+```bash
 update-manager/
 ├── src/
 │   ├── index.ts           # Entry point, CLI menu principal
@@ -64,6 +64,9 @@ um check             # Ver updates disponibles (todos los providers activos)
 um update            # Actualizar todo
 um update winget     # Actualizar solo WinGet
 um providers         # Gestionar providers (activar/desactivar)
+um ignore <id>       # Ignorar un paquete (no aparecerá en check/update)
+um unignore <id>     # Dejar de ignorar un paquete
+um ignored           # Listar paquetes ignorados
 ```
 
 ## Configuración
@@ -84,6 +87,10 @@ Archivo: `~/.config/update-manager/config.json`
     "chocolatey": { "enabled": false },
     "scoop": { "enabled": false }
   },
+  "ignoredPackages": [],
+  "installedVersions": {
+    "Google.PlayGames": "144.0.7547.0"
+  },
   "lastCheck": "2026-01-06T12:00:00Z"
 }
 ```
@@ -94,3 +101,6 @@ Archivo: `~/.config/update-manager/config.json`
 - Los providers desactivados no se ejecutan pero se muestran en el menú de gestión
 - El CLI detecta automáticamente qué gestores están instalados
 - Usa spinners y progress bars estilo docker para feedback visual
+- `installedVersions` guarda la versión instalada después de cada update exitoso
+  - Útil para paquetes con versiones mal etiquetadas (ej: Google Play Games)
+  - Si la versión "nueva" coincide con la guardada, se omite el paquete

@@ -1,6 +1,9 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
 import { commandExists, runCommand } from "../runner";
+import { isNewerVersion } from "./parsers";
+
+const NPM_REGISTRY_URL = "https://registry.npmjs.org/@anthropic-ai/claude-code";
 
 export class ClaudeProvider extends BaseProvider {
   id = "claude";
@@ -12,8 +15,22 @@ export class ClaudeProvider extends BaseProvider {
   }
 
   async checkUpdates(): Promise<PackageUpdate[]> {
-    // Claude CLI doesn't have a way to check for updates without applying them
-    // Return empty - users should run `um update claude` to check and update
+    const currentVersion = await this.getCurrentVersion();
+    if (!currentVersion) {
+      return [];
+    }
+
+    const latestVersion = await this.getLatestVersion();
+    if (!latestVersion) {
+      return [];
+    }
+
+    if (isNewerVersion(currentVersion, latestVersion)) {
+      return [
+        this.createUpdate("claude", "Claude CLI", currentVersion, latestVersion),
+      ];
+    }
+
     return [];
   }
 
@@ -26,6 +43,19 @@ export class ClaudeProvider extends BaseProvider {
 
     const match = versionResult.stdout.match(/(\d+\.\d+\.\d+)/);
     return match ? match[1] : null;
+  }
+
+  private async getLatestVersion(): Promise<string | null> {
+    try {
+      const response = await fetch(NPM_REGISTRY_URL);
+      if (!response.ok) {
+        return null;
+      }
+      const data = await response.json() as { "dist-tags"?: { latest?: string } };
+      return data["dist-tags"]?.latest ?? null;
+    } catch {
+      return null;
+    }
   }
 
   async updatePackage(_packageId: string, _options?: unknown): Promise<boolean> {
