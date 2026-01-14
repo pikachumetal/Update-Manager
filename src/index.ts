@@ -293,6 +293,35 @@ function displayUpdates(updates: PackageUpdate[], checkedProviders: string[]) {
   }
 }
 
+async function selectUpdates(updates: PackageUpdate[]): Promise<PackageUpdate[] | null> {
+  if (updates.length === 0) return [];
+
+  // Group by provider for better display
+  const options = updates.map(u => {
+    const provider = providers[u.provider];
+    const icon = provider?.icon || "📦";
+    const statusBadge = u.status !== "available" ? ` ${formatStatus(u.status)}` : "";
+
+    return {
+      value: u.id,
+      label: `${icon} ${u.name} ${pc.dim(u.currentVersion)} → ${pc.green(u.newVersion)}${statusBadge}`,
+      hint: u.provider,
+    };
+  });
+
+  const selected = await p.multiselect({
+    message: "Select packages to update (space to toggle, enter to confirm)",
+    options,
+    initialValues: updates.map(u => u.id),
+    required: false,
+  });
+
+  if (p.isCancel(selected)) return null;
+
+  const selectedIds = new Set(selected as string[]);
+  return updates.filter(u => selectedIds.has(u.id));
+}
+
 async function updateInteractive() {
   const { updates } = await checkAllProviders();
 
@@ -300,22 +329,13 @@ async function updateInteractive() {
     return;
   }
 
-  const available = updates.filter(u => u.status === "available").length;
-  const skipped = updates.filter(u => u.status !== "available").length;
-
-  let message = `Update ${available} package(s)?`;
-  if (skipped > 0) {
-    message += pc.dim(` (${skipped} will be skipped)`);
-  }
-
-  const confirm = await p.confirm({ message });
-
-  if (p.isCancel(confirm) || !confirm) {
+  const selectedUpdates = await selectUpdates(updates);
+  if (!selectedUpdates || selectedUpdates.length === 0) {
     p.log.info("Update cancelled");
     return;
   }
 
-  await performUpdates(updates);
+  await performUpdates(selectedUpdates);
 }
 
 async function updateCommand(providerId?: string, skipConfirm = false) {
@@ -349,25 +369,19 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
 
   displayUpdates(updates, checkedProviders);
 
+  let selectedUpdates = updates;
+
   if (!skipConfirm) {
-    const available = updates.filter(u => u.status === "available").length;
-    const skippedCount = updates.filter(u => u.status !== "available").length;
-
-    let message = `Update ${available} package(s)?`;
-    if (skippedCount > 0) {
-      message += pc.dim(` (${skippedCount} will be skipped)`);
-    }
-
-    const confirm = await p.confirm({ message });
-
-    if (p.isCancel(confirm) || !confirm) {
+    const selection = await selectUpdates(updates);
+    if (!selection || selection.length === 0) {
       p.log.info("Update cancelled");
       p.outro(pc.dim("Cancelled"));
       return;
     }
+    selectedUpdates = selection;
   }
 
-  await performUpdates(updates);
+  await performUpdates(selectedUpdates);
   p.outro(pc.dim("Done"));
 }
 
@@ -540,13 +554,10 @@ async function updateByProviderInteractive() {
 
   displayUpdates(updates, [selected as string]);
 
-  const confirm = await p.confirm({
-    message: `Update ${updates.length} package(s) from ${provider.name}?`,
-  });
+  const selectedUpdates = await selectUpdates(updates);
+  if (!selectedUpdates || selectedUpdates.length === 0) return;
 
-  if (p.isCancel(confirm) || !confirm) return;
-
-  await performUpdates(updates);
+  await performUpdates(selectedUpdates);
 }
 
 async function providersInteractive() {
