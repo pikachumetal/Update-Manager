@@ -82,3 +82,55 @@ export async function updateLastCheck(): Promise<void> {
   config.lastCheck = new Date().toISOString();
   await saveConfig(config);
 }
+
+export async function getIgnoredPackages(): Promise<string[]> {
+  const config = await loadConfig();
+  return config.ignoredPackages ?? [];
+}
+
+export async function addIgnoredPackage(packageId: string): Promise<void> {
+  const config = await loadConfig();
+  const ignored = config.ignoredPackages ?? [];
+  if (!ignored.includes(packageId)) {
+    ignored.push(packageId);
+    config.ignoredPackages = ignored;
+    await saveConfig(config);
+  }
+}
+
+export async function removeIgnoredPackage(packageId: string): Promise<void> {
+  const config = await loadConfig();
+  const ignored = config.ignoredPackages ?? [];
+  const index = ignored.indexOf(packageId);
+  if (index !== -1) {
+    ignored.splice(index, 1);
+    config.ignoredPackages = ignored;
+    await saveConfig(config);
+  }
+}
+
+export async function getInstalledVersions(): Promise<Record<string, string>> {
+  const config = await loadConfig();
+  return config.installedVersions ?? {};
+}
+
+export async function getInstalledVersion(packageId: string): Promise<string | undefined> {
+  const versions = await getInstalledVersions();
+  return versions[packageId];
+}
+
+export async function setInstalledVersion(packageId: string, version: string): Promise<void> {
+  const config = await loadConfig();
+  const versions = config.installedVersions ?? {};
+  versions[packageId] = version;
+  config.installedVersions = versions;
+  await saveConfig(config);
+}
+
+export async function removeInstalledVersion(packageId: string): Promise<void> {
+  const config = await loadConfig();
+  const versions = config.installedVersions ?? {};
+  delete versions[packageId];
+  config.installedVersions = versions;
+  await saveConfig(config);
+}

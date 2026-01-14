@@ -31,8 +31,10 @@ export async function runCommand(
       env: { ...process.env, FORCE_COLOR: "0" },
     });
 
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+
     const timeoutPromise = new Promise<never>((_, reject) => {
-      setTimeout(() => {
+      timeoutId = setTimeout(() => {
         proc.kill();
         reject(new Error(`Command timed out after ${timeout}ms`));
       }, timeout);
@@ -51,7 +53,11 @@ export async function runCommand(
       };
     })();
 
-    return await Promise.race([resultPromise, timeoutPromise]);
+    try {
+      return await Promise.race([resultPromise, timeoutPromise]);
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
+    }
   } catch (error) {
     return {
       stdout: "",
