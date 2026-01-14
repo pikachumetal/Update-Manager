@@ -124,8 +124,8 @@ async function interactiveMode() {
 }
 
 async function checkInteractive() {
-  const updates = await checkAllProviders();
-  displayUpdates(updates);
+  const { updates, checkedProviders } = await checkAllProviders();
+  displayUpdates(updates, checkedProviders);
   await updateLastCheck();
 }
 
@@ -145,21 +145,27 @@ async function checkCommand(providerId?: string) {
     const updates = await provider.checkUpdates();
     spinner.stop(`${provider.name}: ${updates.length} update(s)`);
 
-    displayUpdates(updates);
+    displayUpdates(updates, [providerId]);
   } else {
-    const updates = await checkAllProviders();
-    displayUpdates(updates);
+    const { updates, checkedProviders } = await checkAllProviders();
+    displayUpdates(updates, checkedProviders);
   }
 
   await updateLastCheck();
   p.outro(pc.dim("Done"));
 }
 
-async function checkAllProviders(): Promise<PackageUpdate[]> {
+interface CheckResult {
+  updates: PackageUpdate[];
+  checkedProviders: string[];
+}
+
+async function checkAllProviders(): Promise<CheckResult> {
   const enabledIds = await getEnabledProviders();
   const ignoredPackages = await getIgnoredPackages();
   const installedVersions = await getInstalledVersions();
   const allUpdates: PackageUpdate[] = [];
+  const checkedProviders: string[] = [];
 
   const spinner = p.spinner();
   spinner.start("Checking for updates...");
@@ -167,23 +173,28 @@ async function checkAllProviders(): Promise<PackageUpdate[]> {
   // Check all providers in parallel
   const checks = enabledIds.map(async (id) => {
     const provider = providers[id];
-    if (!provider) return [];
+    if (!provider) return { id, available: false, updates: [] as PackageUpdate[] };
 
     const isAvailable = await provider.isAvailable();
-    if (!isAvailable) return [];
+    if (!isAvailable) return { id, available: false, updates: [] as PackageUpdate[] };
 
     try {
-      return await provider.checkUpdates();
+      const updates = await provider.checkUpdates();
+      return { id, available: true, updates };
     } catch (error) {
       console.warn(pc.yellow(`  ⚠ ${provider.name}: ${error instanceof Error ? error.message : "check failed"}`));
-      return [];
+      return { id, available: true, updates: [] as PackageUpdate[] };
     }
   });
 
   const results = await Promise.all(checks);
 
-  for (const updates of results) {
-    for (const u of updates) {
+  for (const result of results) {
+    if (result.available) {
+      checkedProviders.push(result.id);
+    }
+
+    for (const u of result.updates) {
       // Skip ignored packages
       if (ignoredPackages.includes(u.id)) continue;
 
@@ -196,7 +207,7 @@ async function checkAllProviders(): Promise<PackageUpdate[]> {
   }
 
   spinner.stop(`Found ${allUpdates.length} update(s)`);
-  return allUpdates;
+  return { updates: allUpdates, checkedProviders };
 }
 
 function formatStatus(status: string): string {
@@ -212,12 +223,7 @@ function formatStatus(status: string): string {
   }
 }
 
-function displayUpdates(updates: PackageUpdate[]) {
-  if (updates.length === 0) {
-    p.log.success(pc.green("Everything is up to date!"));
-    return;
-  }
-
+function displayUpdates(updates: PackageUpdate[], checkedProviders: string[]) {
   // Group by provider
   const grouped = updates.reduce(
     (acc, update) => {
@@ -230,6 +236,10 @@ function displayUpdates(updates: PackageUpdate[]) {
     {} as Record<string, PackageUpdate[]>
   );
 
+  // Find providers with no updates
+  const providersWithUpdates = new Set(Object.keys(grouped));
+  const providersWithoutUpdates = checkedProviders.filter(id => !providersWithUpdates.has(id));
+
   // Count by status
   const available = updates.filter(u => u.status === "available").length;
   const pinned = updates.filter(u => u.status === "pinned").length;
@@ -237,6 +247,7 @@ function displayUpdates(updates: PackageUpdate[]) {
 
   console.log();
 
+  // Show providers with updates
   for (const [providerId, providerUpdates] of Object.entries(grouped)) {
     const provider = providers[providerId];
     const icon = provider?.icon || "📦";
@@ -252,11 +263,26 @@ function displayUpdates(updates: PackageUpdate[]) {
         `   ${pc.dim("•")} ${update.name} ${pc.dim(update.currentVersion)} ${pc.yellow("→")} ${pc.green(update.newVersion)}${statusBadge}${source}`
       );
     }
-
-    console.log();
   }
 
+  // Show providers without updates
+  if (providersWithoutUpdates.length > 0) {
+    for (const providerId of providersWithoutUpdates) {
+      const provider = providers[providerId];
+      const icon = provider?.icon || "📦";
+      const name = provider?.name || providerId;
+      console.log(`${icon} ${pc.dim(name)} ${pc.green("✓")}`);
+    }
+  }
+
+  console.log();
+
   // Summary
+  if (updates.length === 0) {
+    p.log.success(pc.green("Everything is up to date!"));
+    return;
+  }
+
   const parts: string[] = [];
   if (available > 0) parts.push(pc.green(`${available} available`));
   if (pinned > 0) parts.push(pc.yellow(`${pinned} pinned`));
@@ -268,7 +294,7 @@ function displayUpdates(updates: PackageUpdate[]) {
 }
 
 async function updateInteractive() {
-  const updates = await checkAllProviders();
+  const { updates } = await checkAllProviders();
 
   if (updates.length === 0) {
     return;
@@ -296,6 +322,7 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
   p.intro(pc.bgCyan(pc.black(" Updating packages ")));
 
   let updates: PackageUpdate[];
+  let checkedProviders: string[];
 
   if (providerId) {
     const provider = providers[providerId];
@@ -307,9 +334,12 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
     const spinner = p.spinner();
     spinner.start(`Checking ${provider.name}...`);
     updates = await provider.checkUpdates();
+    checkedProviders = [providerId];
     spinner.stop(`Found ${updates.length} update(s)`);
   } else {
-    updates = await checkAllProviders();
+    const result = await checkAllProviders();
+    updates = result.updates;
+    checkedProviders = result.checkedProviders;
   }
 
   if (updates.length === 0) {
@@ -317,7 +347,7 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
     return;
   }
 
-  displayUpdates(updates);
+  displayUpdates(updates, checkedProviders);
 
   if (!skipConfirm) {
     const available = updates.filter(u => u.status === "available").length;
@@ -508,7 +538,7 @@ async function updateByProviderInteractive() {
     return;
   }
 
-  displayUpdates(updates);
+  displayUpdates(updates, [selected as string]);
 
   const confirm = await p.confirm({
     message: `Update ${updates.length} package(s) from ${provider.name}?`,
