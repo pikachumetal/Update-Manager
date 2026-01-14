@@ -30,7 +30,7 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
   const lines = cleanedOutput.split("\n");
 
   // Find all sections (each section has a header followed by separator ---)
-  const sections: { headerIndex: number; separatorIndex: number; isPinned: boolean }[] = [];
+  const sections: { headerIndex: number; separatorIndex: number; isPinned: boolean; requiresExplicit: boolean }[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -44,16 +44,20 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
           headerLine.includes("Id") &&
           headerLine.includes("Version")
         ) {
-          // Check if this section is for pinned packages
-          // Look at lines before the header for "pin" message
+          // Check if this section is for pinned packages or requires explicit targeting
+          // Look at lines before the header for context messages
           let isPinned = false;
-          for (let j = Math.max(0, i - 5); j < i - 1; j++) {
-            if (lines[j].includes("pin") || lines[j].includes("Pin")) {
+          let requiresExplicit = false;
+          for (let j = Math.max(0, i - 10); j < i; j++) {
+            const checkLine = lines[j].toLowerCase();
+            if (checkLine.includes("pin that needs") || checkLine.includes("pins that prevent")) {
               isPinned = true;
-              break;
+            }
+            if (checkLine.includes("explicit targeting") || checkLine.includes("require explicit")) {
+              requiresExplicit = true;
             }
           }
-          sections.push({ headerIndex: i - 1, separatorIndex: i, isPinned });
+          sections.push({ headerIndex: i - 1, separatorIndex: i, isPinned, requiresExplicit });
         }
       }
     }
@@ -74,10 +78,10 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
     // Data starts after separator
     const dataStart = section.separatorIndex + 1;
 
-    // Data ends at next section's "pin" message, empty line, or summary line
-    const nextSectionStart = s + 1 < sections.length ? sections[s + 1].headerIndex - 3 : lines.length;
+    // Data ends at next section header or end of output
+    const nextSectionHeader = s + 1 < sections.length ? sections[s + 1].headerIndex : lines.length;
 
-    for (let i = dataStart; i < nextSectionStart; i++) {
+    for (let i = dataStart; i < nextSectionHeader; i++) {
       const line = lines[i];
 
       // Stop at empty lines, summary lines, or pin messages
@@ -110,9 +114,15 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
       // Skip if id looks like header text
       if (id === "Id" || name === "Name") continue;
 
-      // Determine status
+      // Determine status and notes
       let status: PackageStatus = section.isPinned ? "pinned" : "available";
-      let notes: string | undefined = section.isPinned ? "Package is pinned" : undefined;
+      let notes: string | undefined;
+
+      if (section.isPinned) {
+        notes = "Package is pinned";
+      } else if (section.requiresExplicit) {
+        notes = "Requires explicit targeting";
+      }
 
       // Check for unknown version
       if (currentVersion.toLowerCase() === "unknown" || !currentVersion) {
@@ -139,24 +149,82 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
 
 /**
  * Parse Proto outdated output
- * Format: "tool - current -> latest" or "tool current → latest"
+ * Format is a table with columns: Tool, Current, Newest, Latest, Config
+ * Example:
+ * │bun         1.3.5       1.3.6       1.3.6       C:\...│
  */
 export function parseProtoOutput(output: string): ParsedPackage[] {
   const updates: ParsedPackage[] = [];
-  const lines = output.split("\n").filter((l) => l.trim());
+  const lines = output.split("\n");
 
   for (const line of lines) {
-    // Format: "tool - current -> latest" or similar variations
-    const match = line.match(/^(\w+)\s*[-–]?\s*([\d.]+)\s*(?:->|→)\s*([\d.]+)/);
-    if (match) {
-      const [, tool, current, latest] = match;
-      updates.push({
-        id: tool,
-        name: tool,
-        currentVersion: current,
-        newVersion: latest,
-        status: "available",
-      });
+    // Remove box drawing characters and clean up
+    const cleaned = line.replace(/[│╭╮╰╯─]/g, "").trim();
+    if (!cleaned) continue;
+
+    // Skip header line
+    if (cleaned.startsWith("Tool") || cleaned.includes("─")) continue;
+
+    // Parse columns: Tool, Current, Newest, Latest, Config
+    const parts = cleaned.split(/\s{2,}/).filter(Boolean);
+    if (parts.length >= 4) {
+      const [tool, current, newest] = parts;
+
+      // Skip if it looks like header or invalid
+      if (tool === "Tool" || !current || !newest) continue;
+
+      // Only add if there's actually an update available
+      if (current !== newest && newest.match(/^[\d.]+/)) {
+        updates.push({
+          id: tool,
+          name: tool,
+          currentVersion: current,
+          newVersion: newest,
+          status: "available",
+        });
+      }
+    }
+  }
+
+  return updates;
+}
+
+/**
+ * Parse Bun outdated output
+ * Format is a table with columns: Package, Current, Update, Latest
+ * Example:
+ * | @angular/cli | 21.0.6  | 21.1.0 | 21.1.0 |
+ */
+export function parseBunOutdatedOutput(output: string): ParsedPackage[] {
+  const updates: ParsedPackage[] = [];
+  const lines = output.split("\n");
+
+  for (const line of lines) {
+    // Skip lines that are just separators
+    if (line.match(/^[|\-\s]+$/) || line.includes("---")) continue;
+
+    // Skip header line and version line
+    if (line.includes("Package") || line.includes("bun outdated")) continue;
+
+    // Parse pipe-separated columns
+    const parts = line.split("|").map(s => s.trim()).filter(Boolean);
+    if (parts.length >= 3) {
+      const [pkg, current, update] = parts;
+
+      // Skip if it looks like header or invalid
+      if (!pkg || !current || !update) continue;
+      if (pkg === "Package" || current === "Current") continue;
+
+      // Only add if there's actually an update available
+      if (current !== update && update.match(/^[\d.]+/)) {
+        updates.push({
+          id: pkg,
+          name: pkg,
+          currentVersion: current,
+          newVersion: update,
+          status: "available",
+        });
+      }
     }
   }
 

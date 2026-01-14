@@ -1,6 +1,7 @@
 import { BaseProvider } from "./base";
 import type { PackageUpdate } from "../types";
 import { commandExists, runCommand } from "../runner";
+import { parseBunOutdatedOutput } from "./parsers";
 
 export class BunProvider extends BaseProvider {
   id = "bun";
@@ -12,17 +13,17 @@ export class BunProvider extends BaseProvider {
   }
 
   async checkUpdates(): Promise<PackageUpdate[]> {
-    // Bun doesn't have a built-in outdated command for global packages
-    // We check using npm outdated -g since bun global packages are compatible
-    const result = await runCommand(["bun", "pm", "ls", "-g"], { timeout: 30000 });
+    const result = await runCommand(["bun", "outdated", "-g"], { timeout: 30000 });
 
-    if (!result.success) {
+    // bun outdated returns exit code 1 when there are outdated packages
+    if (!result.stdout) {
       return [];
     }
 
-    // For now, return empty as bun global package management is limited
-    // Users typically update bun itself via `bun upgrade`
-    return [];
+    const parsed = parseBunOutdatedOutput(result.stdout);
+    return parsed.map((pkg) =>
+      this.createUpdate(pkg.id, pkg.name, pkg.currentVersion, pkg.newVersion)
+    );
   }
 
   async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
