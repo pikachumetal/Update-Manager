@@ -1,6 +1,6 @@
 {
   "name": "@pikachu-metal/update-manager",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Interactive CLI to manage updates from multiple package managers (WinGet, Proto, npm, pnpm, Bun, PowerShell Modules, etc.)",
   "author": "Àngel Delgado Fernández",
   "license": "MIT",
