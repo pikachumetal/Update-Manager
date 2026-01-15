@@ -104,3 +104,18 @@ Archivo: `~/.config/update-manager/config.json`
 - `installedVersions` guarda la versión instalada después de cada update exitoso
   - Útil para paquetes con versiones mal etiquetadas (ej: Google Play Games)
   - Si la versión "nueva" coincide con la guardada, se omite el paquete
+
+## WinGet: Paquetes Especiales
+
+Algunos paquetes de WinGet no se pueden actualizar via winget (ej: Discord) porque usan su propio mecanismo de auto-update. El CLI detecta esto y muestra "use app's built-in updater".
+
+Para ocultar estos paquetes de las actualizaciones:
+```bash
+winget pin add Discord.Discord
+```
+
+Para ver/gestionar pins:
+```bash
+winget pin list
+winget pin remove Discord.Discord
+```

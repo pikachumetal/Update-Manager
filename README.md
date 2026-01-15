@@ -35,6 +35,14 @@ um ignored           # Listar ignorados
 - Chocolatey (desactivado)
 - Scoop (desactivado)
 
+## WinGet: Paquetes con auto-update
+
+Algunos paquetes (ej: Discord) no se pueden actualizar via WinGet porque tienen su propio auto-updater. Para ocultarlos:
+
+```bash
+winget pin add Discord.Discord
+```
+
 ## Configuración
 
 Archivo: `~/.config/update-manager/config.json`
