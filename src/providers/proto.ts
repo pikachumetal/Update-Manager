@@ -13,7 +13,9 @@ export class ProtoProvider extends BaseProvider {
   }
 
   async checkUpdates(): Promise<PackageUpdate[]> {
-    const result = await runCommand(["proto", "outdated", "--config-mode", "global"], { timeout: 60000 });
+    const result = await runCommand(["proto", "outdated", "--config-mode", "global"], {
+      timeout: 60000,
+    });
 
     if (!result.success && !result.stdout) {
       return [];

@@ -1,7 +1,17 @@
 #!/usr/bin/env bun
 import * as p from "@clack/prompts";
 import pc from "picocolors";
-import { loadConfig, toggleProvider, updateLastCheck, getEnabledProviders, getIgnoredPackages, addIgnoredPackage, removeIgnoredPackage, getInstalledVersions, setInstalledVersion } from "./config";
+import {
+  loadConfig,
+  toggleProvider,
+  updateLastCheck,
+  getEnabledProviders,
+  getIgnoredPackages,
+  addIgnoredPackage,
+  removeIgnoredPackage,
+  getInstalledVersions,
+  setInstalledVersion,
+} from "./config";
 import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
 import type { PackageUpdate, UpdateProvider } from "./types";
@@ -182,7 +192,11 @@ async function checkAllProviders(): Promise<CheckResult> {
       const updates = await provider.checkUpdates();
       return { id, available: true, updates };
     } catch (error) {
-      console.warn(pc.yellow(`  ⚠ ${provider.name}: ${error instanceof Error ? error.message : "check failed"}`));
+      console.warn(
+        pc.yellow(
+          `  ⚠ ${provider.name}: ${error instanceof Error ? error.message : "check failed"}`
+        )
+      );
       return { id, available: true, updates: [] as PackageUpdate[] };
     }
   });
@@ -238,12 +252,12 @@ function displayUpdates(updates: PackageUpdate[], checkedProviders: string[]) {
 
   // Find providers with no updates
   const providersWithUpdates = new Set(Object.keys(grouped));
-  const providersWithoutUpdates = checkedProviders.filter(id => !providersWithUpdates.has(id));
+  const providersWithoutUpdates = checkedProviders.filter((id) => !providersWithUpdates.has(id));
 
   // Count by status
-  const available = updates.filter(u => u.status === "available").length;
-  const pinned = updates.filter(u => u.status === "pinned").length;
-  const unknown = updates.filter(u => u.status === "unknown").length;
+  const available = updates.filter((u) => u.status === "available").length;
+  const pinned = updates.filter((u) => u.status === "pinned").length;
+  const unknown = updates.filter((u) => u.status === "unknown").length;
 
   console.log();
 
@@ -297,7 +311,7 @@ async function selectUpdates(updates: PackageUpdate[]): Promise<PackageUpdate[] 
   if (updates.length === 0) return [];
 
   // Group by provider for better display
-  const options = updates.map(u => {
+  const options = updates.map((u) => {
     const provider = providers[u.provider];
     const icon = provider?.icon || "📦";
     const statusBadge = u.status !== "available" ? ` ${formatStatus(u.status)}` : "";
@@ -312,14 +326,14 @@ async function selectUpdates(updates: PackageUpdate[]): Promise<PackageUpdate[] 
   const selected = await p.multiselect({
     message: "Select packages to update (space to toggle, enter to confirm)",
     options,
-    initialValues: updates.map(u => u.id),
+    initialValues: updates.map((u) => u.id),
     required: false,
   });
 
   if (p.isCancel(selected)) return null;
 
   const selectedIds = new Set(selected as string[]);
-  return updates.filter(u => selectedIds.has(u.id));
+  return updates.filter((u) => selectedIds.has(u.id));
 }
 
 async function updateInteractive() {
@@ -387,8 +401,8 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
 
 async function performUpdates(updates: PackageUpdate[]) {
   // Separate by status
-  const toUpdate = updates.filter(u => u.status === "available");
-  const skippable = updates.filter(u => u.status === "pinned" || u.status === "unknown");
+  const toUpdate = updates.filter((u) => u.status === "available");
+  const skippable = updates.filter((u) => u.status === "pinned" || u.status === "unknown");
 
   // Track packages to force update
   let forceUpdates: PackageUpdate[] = [];
@@ -404,7 +418,7 @@ async function performUpdates(updates: PackageUpdate[]) {
     }
 
     // Only ask for WinGet packages (they support --force)
-    const wingetSkippable = skippable.filter(u => u.provider === "winget");
+    const wingetSkippable = skippable.filter((u) => u.provider === "winget");
     if (wingetSkippable.length > 0) {
       // Check if gsudo is available for elevation
       const hasGsudo = await commandExists("gsudo");
@@ -435,7 +449,7 @@ async function performUpdates(updates: PackageUpdate[]) {
 
       if (!p.isCancel(forceConfirm) && forceConfirm) {
         forceUpdates = wingetSkippable;
-        finalSkipped = skippable.filter(u => u.provider !== "winget");
+        finalSkipped = skippable.filter((u) => u.provider !== "winget");
       }
     }
   }
