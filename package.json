@@ -50,7 +50,9 @@
     "test:coverage": "bun test --coverage",
     "link": "bun link",
     "test": "bun test",
-    "test:watch": "bun test --watch"
+    "test:watch": "bun test --watch",
+    "typecheck": "tsc --noEmit",
+    "deps:update": "ncu --interactive --format group"
   },
   "dependencies": {
     "@clack/prompts": "0.11.0",
