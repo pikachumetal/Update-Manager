@@ -37,7 +37,7 @@ created: 2026-10-06
 - Indentación de 2 espacios y LF en todo fichero de texto, salvo `*.cmd`, `*.bat` y `*.ps1`, que van en CRLF.
 - Versiones exactas en `package.json`, sin `^` ni `~`.
 - `typescript` = `6.0.3`. Bun = `1.4.2` (`.prototools`, `packageManager`: `bun@1.4.2`, `engines.bun`: `>=1.4.2`). moon = `2.6.0`.
-- Sin `engines.node` y sin devDep `@types/node`.
+- Sin `engines.node`. `@types/node` fijada como devDep (enmienda de la spec, 2026-10-06).
 - El comportamiento de `um` no cambia. `UpdateOptions` solo gana `interactive?: boolean`.
 - Los comandos externos pasan por `runCommand` / `runPowerShell` (`src/runner.ts`).
 - Sin comentarios que repitan el código ni que citen documentos (constitution, spec, task, capacidad).

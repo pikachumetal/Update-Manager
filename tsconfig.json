@@ -18,16 +18,7 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "types": ["bun-types"],
-    "baseUrl": "./src",
-    "paths": {
-      "@update-manager/*": ["./*"],
-      "@update-manager/providers": ["./providers/index.ts"],
-      "@update-manager/providers/*": ["./providers/*"],
-      "@update-manager/types": ["./types.ts"],
-      "@update-manager/config": ["./config.ts"],
-      "@update-manager/runner": ["./runner.ts"]
-    }
+    "types": ["bun-types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "bin"]

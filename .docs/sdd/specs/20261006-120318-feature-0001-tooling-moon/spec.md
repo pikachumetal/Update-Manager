@@ -35,7 +35,7 @@ Review de spec propuesta: ninguna. Señales: dependencia externa (moon y `npm-ch
 9. **Las dependencias y devDependencies se suben todas a su última versión, majors incluidas (ESLint 10, entre otras).** Si un major obliga a tocar código, se arregla en la feature solo si es un cambio de API sin efecto en `um`. Si no, la dependencia se queda en su major actual, con el motivo escrito en `tech-stack.md`.
 17. **Todas las versiones de `package.json` van fijadas, sin `^` ni `~`.** `bunfig.toml` lleva `[install] exact = true` para que `bun add` también fije la versión exacta. ncu respeta los rangos exactos al subir.
 18. **TypeScript 6.0.3, no 7.** La última `typescript-eslint` (8.71.1) exige `typescript >=4.8.4 <6.1.0`, y nuestra config de ESLint usa `parserOptions.project`. Pasar a TS 7 queda en el Backlog (B5), a la espera de que `typescript-eslint` lo soporte.
-19. **Solo Bun, sin Node.** `bunfig.toml` lleva `[run] bun = true`, así que `eslint`, `prettier` y `tsc`, que tienen shebang de `node`, se ejecutan con Bun. Se quitan `engines.node` y la devDep explícita `@types/node`, que sigue llegando como dependencia de `@types/bun`. Si alguna herramienta falla bajo Bun, se queda con Node y el motivo se escribe en `tech-stack.md`.
+19. **Solo Bun, sin Node.** `bunfig.toml` lleva `[run] bun = true`, así que `eslint`, `prettier` y `tsc`, que tienen shebang de `node`, se ejecutan con Bun. Se quita `engines.node`. `@types/node` se mantiene como devDep explícita y fijada (enmienda del 2026-10-06). Si alguna herramienta falla bajo Bun, se queda con Node y el motivo se escribe en `tech-stack.md`.
 10. **`UpdateOptions` gana `interactive?: boolean`**: `winget.ts` ya lo lee. Solo se tipa lo que hay, para que pase `tsc`, sin cambiar el comportamiento.
 11. **El reformateo de `src/` va en su propio commit, solo de formato**, para que se lea aparte. Es la «migración masiva» del artículo 4 de la constitution, y su justificación es esta spec: B1 decidido y `format:check` en rojo.
 12. **`.gitattributes` se reduce** a `* text=auto eol=lf`, las excepciones CRLF (`*.cmd`, `*.bat`, `*.ps1`) y los binarios. Las líneas `eol=lf` por extensión repiten la regla general. El working tree se renormaliza una sola vez.
@@ -91,12 +91,12 @@ Escenarios de aceptación (el smoke de la validación da una fila por THEN):
 8. GIVEN la rama terminada · WHEN se listan los ficheros versionados · THEN no existe ninguno de `sonar-project.properties`, `.env.example`, `.gemini/`, `.idea/`, `.vscode/`, `.github/`, `update-manager.code-workspace` ni `PLANNING.md`.
 9. GIVEN `um` instalado desde la rama · WHEN `um check` · THEN lista las actualizaciones agrupadas por provider, igual que antes de la feature.
 10. GIVEN `.prototools` · WHEN se busca la versión de Bun en el repo · THEN `.prototools` dice `bun = "1.4.2"`, `packageManager` dice `bun@1.4.2` y `engines.bun` dice `>=1.4.2`.
-11. GIVEN `package.json` · WHEN se leen `dependencies` y `devDependencies` · THEN ninguna versión empieza por `^` ni por `~`, no hay `engines.node` ni `@types/node`, y `typescript` es `6.0.3`.
+11. GIVEN `package.json` · WHEN se leen `dependencies` y `devDependencies` · THEN ninguna versión empieza por `^` ni por `~`, no hay `engines.node`, `@types/node` está fijada como devDep y `typescript` es `6.0.3`.
 12. GIVEN un PATH sin `node` · WHEN `moon run :lint :typecheck :test` · THEN las tres tareas se ejecutan con Bun y salen como dicen los escenarios 1, 2 y 3.
 
 ## Enmiendas
 
-_Ninguna._
+- 2026-10-06 — `@types/node` vuelve como devDep explícita (`26.6.4`); cambian la decisión 19 y el escenario 11 — `bun-types` la pide con `*`, el lock la deja en 25.0.8 y con esa versión `process.on("SIGINT")` no tipa; son solo tipos, y Node sigue fuera como runtime — aprobada: «devDep explícita (Recomendado)»
 
 ## Aprobaciones
 
