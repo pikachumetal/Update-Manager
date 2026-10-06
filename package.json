@@ -49,7 +49,6 @@
     "format:check": "prettier --check \"src/**/*.{ts,js,json}\"",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "sonar": "sonar --define sonar.host.url=https://sonarqube.devtools.local --define sonar.token=%SONAR_TOKEN% --define sonar.projectKey=update-manager",
     "test:coverage": "bun test --coverage",
     "link": "bun link",
     "test": "bun test",
@@ -61,7 +60,6 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
-    "@sonar/scan": "^4.3.4",
     "@types/bun": "^1.3.6",
     "@types/node": "^24.10.9",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
@@ -69,7 +67,6 @@
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.8.0",
-    "sonarqube-scanner": "^4.3.4",
     "typescript": "^5.9.3"
   },
   "engines": {
