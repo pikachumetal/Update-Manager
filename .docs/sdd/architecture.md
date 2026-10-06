@@ -3,6 +3,10 @@
 ## Estructura
 
 ```text
+.moon/workspace.yml        Workspace de moon con un solo proyecto (update-manager, en la raíz)
+moon.yml                   Tareas de moon; cada una ejecuta su script de package.json con bun run
+.prototools                Versiones de bun y moon (única fuente)
+bunfig.toml                Bun como runtime de los scripts (run.bun) y versiones exactas al instalar (install.exact)
 bin/cli.js                 Entry de npm (shebang bun): importa src/index.ts
 src/
 ├── index.ts               CLI: parseo de argv, modo interactivo, check/update/providers/ignore, flujo de force y gsudo
@@ -65,3 +69,6 @@ Comandos reales de cada provider (los que verifica el código):
 - (anterior a SDD) — Los comandos van por `cmd.exe /c` en Windows — para resolver los alias de WindowsApps (`winget`) — `src/runner.ts`.
 - (anterior a SDD) — Los parsers son funciones puras separadas de los providers — para poder testearlos sin lanzar procesos — `src/providers/parsers.ts`.
 - (anterior a SDD) — Ante una config inválida se vuelve a los defaults en silencio — `src/config.ts#loadConfig`.
+- (anterior a SDD) — Bun como runtime — TypeScript nativo, gestor de paquetes integrado y `Bun.spawn` para lanzar comandos — `PLANNING.md` original.
+- (anterior a SDD) — @clack/prompts para la UI — consistencia con project-manager y spinners integrados — `PLANNING.md` original.
+- 2026-10-06 — moon orquesta y `package.json` define — moon llama a los scripts con `bun run`, así que `bun run <script>` sigue funcionando — feature 0001.

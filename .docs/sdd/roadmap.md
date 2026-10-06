@@ -12,6 +12,9 @@
 | --- | --- | --- |
 | B1 | Decidir la indentación: `.prettierrc` (`useTabs: true`) contra `.editorconfig` y el código (2 espacios) | onboarding SDD, 2026-10-05 |
 | B2 | Decidir dónde se fija la versión de Bun: `packageManager` `bun@1.3.6`, `engines` `>=1.3` y `.prototools` `1.3` | onboarding SDD, 2026-10-05 |
+| B3 | Progress bars estilo docker durante las actualizaciones | `PLANNING.md` original, fase 5 |
+| B4 | Logs y errores detallados | `PLANNING.md` original, fase 5 |
+| B5 | Pasar a TypeScript 7 cuando `typescript-eslint` lo admita (hoy exige `typescript <6.1.0`) | feature 0001, 2026-10-06 |
 
 ## Deuda técnica
 
@@ -30,6 +33,8 @@
 | No hay CI de tests ni de typecheck: `.github/workflows/` solo lanza Claude Code | medio: los rojos de arriba llegaron a `develop` sin aviso | **Esperar 2.º ticket** |
 | `src/index.ts` concentra 557 líneas: comandos, menús, render y flujo de force | bajo: crece con cada comando | **Esperar 2.º ticket** |
 | `PLANNING.md` es el plan inicial, con las casillas de las fases sin marcar; no refleja el estado actual | bajo: documentación contradictoria | **Actuar**: patch (borrarlo o archivarlo) |
+| `um check` no lista WinGet (ni con updates ni con ✓) en la máquina del autor; igual en `develop` antes de la 0001 | medio: el provider principal no aparece | **Actuar**: patch (investigar `isAvailable` / `checkUpdates` de winget) |
+| pnpm: `um check` muestra un update `[WARN] Using → skips`; el parser toma una línea de aviso de `pnpm outdated` como paquete | bajo: ruido en la salida | **Actuar**: patch |
 | `bun run sonar` pasa `%SONAR_TOKEN%` con sintaxis de cmd. Sin verificar si `bun run` lo expande en Windows | bajo | **Esperar 2.º ticket** |
 
 ## Patches
