@@ -7,7 +7,7 @@
 moon.yml                   Tareas de moon; cada una ejecuta su script de package.json con bun run
 .prototools                Versiones de bun y moon (única fuente)
 bunfig.toml                Bun como runtime de los scripts (run.bun) y versiones exactas al instalar (install.exact)
-bin/cli.js                 Entry de npm (shebang bun): importa src/index.ts
+bin/cli.js                 Entry de `bun link` (shebang bun): importa src/index.ts
 src/
 ├── index.ts               CLI: parseo de argv, modo interactivo, check/update/providers/ignore, flujo de force y gsudo
 ├── config.ts              Lectura y escritura de ~/.config/update-manager/config.json (providers, ignorados, installedVersions, lastCheck)

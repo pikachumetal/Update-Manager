@@ -44,11 +44,11 @@ To open the interactive menu, run `um` with no arguments. To act directly, use a
 | --- | --- |
 | `um check [PROVIDER]` | Lists available updates, grouped by package manager. |
 | `um update [PROVIDER]` | Lists available updates and asks which ones to apply. |
-| `um update --yes` | Applies every available update without asking. |
+| `um update PROVIDER --yes` | Applies every available update of one package manager without asking. |
 | `um providers` | Lists every package manager as enabled, disabled, or not installed. |
 | `um providers enable PROVIDER` | Turns a package manager on. |
 | `um providers disable PROVIDER` | Turns a package manager off. |
-| `um ignore PACKAGE_ID` | Hides a package from `check` and `update`. |
+| `um ignore PACKAGE_ID` | Hides a package when you check or update all package managers. |
 | `um unignore PACKAGE_ID` | Shows an ignored package again. |
 | `um ignored` | Lists ignored packages. |
 

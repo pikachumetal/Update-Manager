@@ -47,8 +47,6 @@ tasks:
     inputs:
       - '@group(sources)'
       - '@group(configs)'
-    outputs:
-      - 'coverage'
 
   typecheck:
     command: 'bun run typecheck'
