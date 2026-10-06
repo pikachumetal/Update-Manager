@@ -12,6 +12,7 @@ projects.json
 tools.json
 recents.json
 settings.json
+!.claude/settings.json
 
 # Code coverage
 coverage/
@@ -50,3 +51,8 @@ bun.lockb
 # SonarQube
 .scannerwork/
 .sonar/
+
+# SDD kit y herramientas del agente
+.playwright-mcp/
+.superpowers/
+.docs/sdd/sdd-kit.local.json

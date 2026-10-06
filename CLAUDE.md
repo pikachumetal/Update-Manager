@@ -1,121 +1,19 @@
 # Update Manager
 
-CLI interactivo para gestionar actualizaciones de múltiples gestores de paquetes en Windows.
+CLI interactiva (Bun + TypeScript) que consulta y aplica actualizaciones de varios gestores de paquetes en Windows. El proyecto se trabaja con el kit SDD: la documentación de anclaje vive en `.docs/sdd/`.
 
-## Stack
+## Documentos
 
-- **Runtime**: Bun
-- **Language**: TypeScript
-- **UI**: @clack/prompts (CLI interactivo)
-- **Colors**: picocolors
+- `.docs/sdd/mission.md`: qué hace el sistema y su glosario (provider, status, force, `installedVersions`…).
+- `.docs/sdd/tech-stack.md`: versiones, comandos (`bun test`, `bun run build`, lint, format, sonar) y política de testing.
+- `.docs/sdd/architecture.md`: piezas, comandos reales de cada provider, flujo y dónde va lo nuevo.
+- `.docs/sdd/constitution.md`: principios, convenciones (ramas, commits) y reglas de producto. Manda sobre cualquier spec.
+- `.docs/sdd/roadmap.md`: lo próximo, el backlog y la deuda técnica.
 
-## Gestores de Paquetes Soportados
+## Reglas críticas
 
-| Gestor        | Comando Check          | Comando Update             | Estado      |
-| ------------- | ---------------------- | -------------------------- | ----------- |
-| WinGet        | `winget upgrade`       | `winget upgrade --id <id>` | Activo      |
-| Proto         | `proto outdated`       | `proto install <tool>`     | Activo      |
-| Moonrepo      | `moon upgrade --check` | `moon upgrade`             | Activo      |
-| PS Modules    | `Get-InstalledModule`  | `Update-Module`            | Activo      |
-| Bun (global)  | `bun pm ls -g`         | `bun update -g`            | Activo      |
-| npm (global)  | `npm outdated -g`      | `npm update -g`            | Activo      |
-| pnpm (global) | `pnpm outdated -g`     | `pnpm update -g`           | Activo      |
-| Claude CLI    | `claude --version`     | `claude update`            | Activo      |
-| Chocolatey    | `choco outdated`       | `choco upgrade`            | Desactivado |
-| Scoop         | `scoop status`         | `scoop update`             | Desactivado |
-
-## Estructura del Proyecto
-
-```bash
-update-manager/
-├── src/
-│   ├── index.ts           # Entry point, CLI menu principal
-│   ├── config.ts          # Configuración y estado de providers
-│   ├── types.ts           # Tipos y schemas
-│   └── providers/
-│       ├── base.ts        # Interface base para providers
-│       ├── winget.ts      # WinGet provider
-│       ├── proto.ts       # Proto provider
-│       ├── moonrepo.ts    # Moonrepo provider
-│       ├── psmodules.ts   # PowerShell modules provider
-│       ├── bun.ts         # Bun global packages provider
-│       ├── npm.ts         # npm global packages provider
-│       ├── pnpm.ts        # pnpm global packages provider
-│       ├── claude.ts      # Claude CLI provider
-│       ├── chocolatey.ts  # Chocolatey provider (disabled)
-│       └── scoop.ts       # Scoop provider (disabled)
-├── package.json
-├── tsconfig.json
-├── CLAUDE.md
-├── PLANNING.md
-└── README.md
-```
-
-## Comandos
-
-```bash
-# Desarrollo
-bun run dev          # Ejecutar en modo desarrollo
-bun run build        # Compilar
-
-# Uso
-um                   # CLI interactivo
-um check             # Ver updates disponibles (todos los providers activos)
-um update            # Actualizar todo
-um update winget     # Actualizar solo WinGet
-um providers         # Gestionar providers (activar/desactivar)
-um ignore <id>       # Ignorar un paquete (no aparecerá en check/update)
-um unignore <id>     # Dejar de ignorar un paquete
-um ignored           # Listar paquetes ignorados
-```
-
-## Configuración
-
-Archivo: `~/.config/update-manager/config.json`
-
-```json
-{
-  "providers": {
-    "winget": { "enabled": true },
-    "proto": { "enabled": true },
-    "moonrepo": { "enabled": true },
-    "psmodules": { "enabled": true },
-    "bun": { "enabled": true },
-    "npm": { "enabled": true },
-    "pnpm": { "enabled": true },
-    "claude": { "enabled": true },
-    "chocolatey": { "enabled": false },
-    "scoop": { "enabled": false }
-  },
-  "ignoredPackages": [],
-  "installedVersions": {
-    "Google.PlayGames": "144.0.7547.0"
-  },
-  "lastCheck": "2026-01-06T12:00:00Z"
-}
-```
-
-## Notas de Desarrollo
-
-- Cada provider implementa la interface `UpdateProvider`
-- Los providers desactivados no se ejecutan pero se muestran en el menú de gestión
-- El CLI detecta automáticamente qué gestores están instalados
-- Usa spinners y progress bars estilo docker para feedback visual
-- `installedVersions` guarda la versión instalada después de cada update exitoso
-  - Útil para paquetes con versiones mal etiquetadas (ej: Google Play Games)
-  - Si la versión "nueva" coincide con la guardada, se omite el paquete
-
-## WinGet: Paquetes Especiales
-
-Algunos paquetes de WinGet no se pueden actualizar via winget (ej: Discord) porque usan su propio mecanismo de auto-update. El CLI detecta esto y muestra "use app's built-in updater".
-
-Para ocultar estos paquetes de las actualizaciones:
-```bash
-winget pin add Discord.Discord
-```
-
-Para ver/gestionar pins:
-```bash
-winget pin list
-winget pin remove Discord.Discord
-```
+- `~/.config/update-manager/config.json` es del usuario: un cambio de `ConfigSchema` nunca rompe un fichero ya existente.
+- Los comandos externos pasan siempre por `runCommand` / `runPowerShell` (`src/runner.ts`).
+- Un parser nuevo va en `src/providers/parsers.ts`, con su test en `parsers.test.ts` y una salida real como fixture.
+- Nada de refactor oportunista: la deuda se salda desde la tabla del roadmap, en su propio patch.
+- Gitflow: se trabaja desde `develop`. `main` y los tags los mueve una persona.
