@@ -1,5 +1,3 @@
-import { $ } from "bun";
-
 export interface CommandResult {
   stdout: string;
   stderr: string;
@@ -20,9 +18,7 @@ export async function runCommand(
   try {
     // On Windows, run through cmd.exe to properly resolve WindowsApps aliases
     const isWindows = process.platform === "win32";
-    const spawnArgs = isWindows
-      ? ["cmd.exe", "/c", ...cmd]
-      : cmd;
+    const spawnArgs = isWindows ? ["cmd.exe", "/c", ...cmd] : cmd;
 
     const proc = Bun.spawn(spawnArgs, {
       cwd,

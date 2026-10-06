@@ -1,0 +1,79 @@
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+language: 'typescript'
+
+fileGroups:
+  sources:
+    - 'src/**/*'
+  configs:
+    - 'package.json'
+    - 'bun.lock'
+    - 'bunfig.toml'
+    - 'tsconfig.json'
+
+tasks:
+  start:
+    command: 'bun run start'
+    preset: 'utility'
+    options:
+      interactive: true
+
+  dev:
+    command: 'bun run dev'
+    preset: 'server'
+
+  clean:
+    command: 'bun run clean'
+    options:
+      cache: false
+
+  build:
+    command: 'bun run build'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+    outputs:
+      - 'bin/update-manager.exe'
+      - 'bin/um.exe'
+
+  test:
+    command: 'bun run test'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  test-coverage:
+    command: 'bun run test:coverage'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  typecheck:
+    command: 'bun run typecheck'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+
+  lint:
+    command: 'bun run lint'
+    inputs:
+      - '@group(sources)'
+      - '@group(configs)'
+      - '.prettierrc'
+      - 'eslint.config.js'
+
+  lint-fix:
+    command: 'bun run lint:fix'
+    options:
+      cache: false
+
+  deps-update:
+    command: 'bun run deps:update'
+    preset: 'utility'
+    options:
+      interactive: true
+
+  link:
+    command: 'bun run link'
+    options:
+      cache: false

@@ -29,8 +29,10 @@ export class MoonrepoProvider extends BaseProvider {
     const checkResult = await runCommand(["moon", "upgrade", "--check"], { timeout: 30000 });
 
     // If upgrade --check indicates an update is available
-    if (checkResult.stdout.toLowerCase().includes("available") ||
-        checkResult.stdout.toLowerCase().includes("new version")) {
+    if (
+      checkResult.stdout.toLowerCase().includes("available") ||
+      checkResult.stdout.toLowerCase().includes("new version")
+    ) {
       const newVersion = this.extractNewVersion(checkResult.stdout) || "latest";
       return [this.createUpdate("moon", "moon", currentVersion, newVersion)];
     }

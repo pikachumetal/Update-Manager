@@ -2,7 +2,7 @@
 
 ## Por qué existe
 
-En Windows, mantener al día un equipo de desarrollo obliga a recorrer varios gestores de paquetes (WinGet, proto, npm, pnpm, Bun, módulos de PowerShell…), cada uno con su comando y su formato de salida. `update-manager` (`um`) los consulta todos de una vez, muestra las actualizaciones pendientes agrupadas por gestor y deja elegir cuáles aplicar. Lo usa su autor en su propia máquina y se publica en npm como `@pikachu-metal/update-manager`.
+En Windows, mantener al día un equipo de desarrollo obliga a recorrer varios gestores de paquetes (WinGet, proto, npm, pnpm, Bun, módulos de PowerShell…), cada uno con su comando y su formato de salida. `update-manager` (`um`) los consulta todos de una vez, muestra las actualizaciones pendientes agrupadas por gestor y deja elegir cuáles aplicar. Lo usa su autor en su propia máquina. No se publica en ningún registro: se instala desde el código fuente con `bun link`.
 
 ## Usuarios y roles
 

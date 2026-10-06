@@ -5,10 +5,15 @@ CLI interactiva (Bun + TypeScript) que consulta y aplica actualizaciones de vari
 ## Documentos
 
 - `.docs/sdd/mission.md`: qué hace el sistema y su glosario (provider, status, force, `installedVersions`…).
-- `.docs/sdd/tech-stack.md`: versiones, comandos (`bun test`, `bun run build`, lint, format, sonar) y política de testing.
+- `.docs/sdd/tech-stack.md`: versiones, comandos `moon run` (lint, typecheck, test, build, deps-update) y política de testing.
 - `.docs/sdd/architecture.md`: piezas, comandos reales de cada provider, flujo y dónde va lo nuevo.
 - `.docs/sdd/constitution.md`: principios, convenciones (ramas, commits) y reglas de producto. Manda sobre cualquier spec.
 - `.docs/sdd/roadmap.md`: lo próximo, el backlog y la deuda técnica.
+
+## Comandos
+
+- Antes de commitear: `moon run :lint :typecheck :test`. Todo corre con Bun (`bunfig.toml`), sin Node.
+- moon cachea por inputs: cuando cambien dependencias o `tsconfig.json`, añade `--force` para no fiarte de un verde cacheado.
 
 ## Reglas críticas
 

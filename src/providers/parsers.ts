@@ -23,14 +23,17 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
   const updates: ParsedPackage[] = [];
 
   // Clean up control characters and normalize line endings
-  const cleanedOutput = output
-    .replace(/\r\n/g, "\n")
-    .replace(/\r/g, "\n");
+  const cleanedOutput = output.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
   const lines = cleanedOutput.split("\n");
 
   // Find all sections (each section has a header followed by separator ---)
-  const sections: { headerIndex: number; separatorIndex: number; isPinned: boolean; requiresExplicit: boolean }[] = [];
+  const sections: {
+    headerIndex: number;
+    separatorIndex: number;
+    isPinned: boolean;
+    requiresExplicit: boolean;
+  }[] = [];
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -53,7 +56,10 @@ export function parseWingetOutput(output: string): ParsedPackage[] {
             if (checkLine.includes("pin that needs") || checkLine.includes("pins that prevent")) {
               isPinned = true;
             }
-            if (checkLine.includes("explicit targeting") || checkLine.includes("require explicit")) {
+            if (
+              checkLine.includes("explicit targeting") ||
+              checkLine.includes("require explicit")
+            ) {
               requiresExplicit = true;
             }
           }
@@ -207,7 +213,10 @@ export function parseBunOutdatedOutput(output: string): ParsedPackage[] {
     if (line.includes("Package") || line.includes("bun outdated")) continue;
 
     // Parse pipe-separated columns
-    const parts = line.split("|").map(s => s.trim()).filter(Boolean);
+    const parts = line
+      .split("|")
+      .map((s) => s.trim())
+      .filter(Boolean);
     if (parts.length >= 3) {
       const [pkg, current, update] = parts;
 
@@ -234,10 +243,7 @@ export function parseBunOutdatedOutput(output: string): ParsedPackage[] {
 /**
  * Parse npm/pnpm outdated JSON output
  */
-export function parseNpmJsonOutput(
-  output: string,
-  provider: string
-): ParsedPackage[] {
+export function parseNpmJsonOutput(output: string, _provider: string): ParsedPackage[] {
   const updates: ParsedPackage[] = [];
 
   try {
@@ -319,10 +325,7 @@ export function parsePsModulesOutput(output: string): ParsedPackage[] {
  * Compare versions, handling prerelease suffixes
  * Returns true if newVersion > currentVersion
  */
-export function isNewerVersion(
-  currentVersion: string,
-  newVersion: string
-): boolean {
+export function isNewerVersion(currentVersion: string, newVersion: string): boolean {
   // Strip prerelease suffix for comparison
   const cleanCurrent = currentVersion.replace(/-.*$/, "");
   const cleanNew = newVersion.replace(/-.*$/, "");

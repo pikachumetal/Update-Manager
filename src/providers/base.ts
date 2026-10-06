@@ -1,4 +1,10 @@
-import type { PackageUpdate, PackageStatus, UpdateResult, UpdateProvider, UpdateOptions } from "../types";
+import type {
+  PackageUpdate,
+  PackageStatus,
+  UpdateResult,
+  UpdateProvider,
+  UpdateOptions,
+} from "../types";
 
 export interface CreateUpdateOptions {
   status?: PackageStatus;

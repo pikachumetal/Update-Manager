@@ -23,10 +23,7 @@ export class WingetProvider extends BaseProvider {
   }
 
   async checkUpdates(): Promise<PackageUpdate[]> {
-    const result = await runCommand(
-      ["winget", "upgrade", "--include-pinned"],
-      { timeout: 120000 }
-    );
+    const result = await runCommand(["winget", "upgrade", "--include-pinned"], { timeout: 120000 });
 
     if (!result.success && !result.stdout) {
       return [];
@@ -44,10 +41,12 @@ export class WingetProvider extends BaseProvider {
 
   async updatePackage(packageId: string, options?: UpdateOptions): Promise<boolean> {
     const wingetArgs = [
-      "winget", "upgrade",
-      "--id", packageId,
+      "winget",
+      "upgrade",
+      "--id",
+      packageId,
       "--accept-package-agreements",
-      "--accept-source-agreements"
+      "--accept-source-agreements",
     ];
 
     // Only use --silent if not interactive mode (some packages don't support it)
@@ -64,12 +63,12 @@ export class WingetProvider extends BaseProvider {
 
     // If failed with --silent, retry without it (some packages require interaction)
     if (!result.success && !options?.interactive && wingetArgs.includes("--silent")) {
-      const interactiveArgs = wingetArgs.filter(arg => arg !== "--silent");
+      const interactiveArgs = wingetArgs.filter((arg) => arg !== "--silent");
       result = await runCommand(interactiveArgs, { timeout: 300000 });
     }
 
     // If failed and force is enabled, retry with gsudo
-    if (!result.success && options?.force && await this.hasGsudo()) {
+    if (!result.success && options?.force && (await this.hasGsudo())) {
       result = await runCommand(["gsudo", ...wingetArgs], { timeout: 300000 });
     }
 
@@ -91,8 +90,8 @@ export class WingetProvider extends BaseProvider {
     skipped: string[];
   }> {
     const updates = await this.checkUpdates();
-    const pinned = updates.filter(u => u.status === "pinned").map(u => u.id);
-    const available = updates.filter(u => u.status === "available");
+    const pinned = updates.filter((u) => u.status === "pinned").map((u) => u.id);
+    const available = updates.filter((u) => u.status === "available");
 
     if (available.length === 0) {
       return {
@@ -105,18 +104,20 @@ export class WingetProvider extends BaseProvider {
 
     const result = await runCommand(
       [
-        "winget", "upgrade", "--all",
+        "winget",
+        "upgrade",
+        "--all",
         "--silent",
         "--accept-package-agreements",
-        "--accept-source-agreements"
+        "--accept-source-agreements",
       ],
       { timeout: 600000 }
     );
 
     return {
       success: result.success,
-      updated: result.success ? available.map(u => u.id) : [],
-      failed: result.success ? [] : available.map(u => u.id),
+      updated: result.success ? available.map((u) => u.id) : [],
+      failed: result.success ? [] : available.map((u) => u.id),
       skipped: pinned,
     };
   }
