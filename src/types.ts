@@ -39,6 +39,7 @@ export interface UpdateResult {
 
 export interface UpdateOptions {
   force?: boolean;
+  interactive?: boolean;
 }
 
 export interface UpdateProvider {

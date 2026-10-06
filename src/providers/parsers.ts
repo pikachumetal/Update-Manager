@@ -243,7 +243,7 @@ export function parseBunOutdatedOutput(output: string): ParsedPackage[] {
 /**
  * Parse npm/pnpm outdated JSON output
  */
-export function parseNpmJsonOutput(output: string, provider: string): ParsedPackage[] {
+export function parseNpmJsonOutput(output: string, _provider: string): ParsedPackage[] {
   const updates: ParsedPackage[] = [];
 
   try {
