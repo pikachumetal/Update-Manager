@@ -18,7 +18,7 @@
 
 - **Solo Bun**: `bunfig.toml` lleva `[run] bun = true`, así que `eslint`, `prettier` y `tsc` corren con Bun aunque su shebang diga `node`. No hay `engines.node`. `@types/node` sí es devDep, porque son los tipos de la API de Node que implementa Bun, y `bun-types` la pide con `*`.
 - **Versiones exactas**: `package.json` no lleva `^` ni `~`, y `bunfig.toml` (`[install] exact = true`) hace que `bun add` también fije la versión exacta. Se suben a mano con `moon run :deps-update`.
-- **TypeScript se queda en 6**: `typescript-eslint` 8.71.1 exige `typescript <6.1.0`. B5 del roadmap.
+- **TypeScript se queda en 6**: `typescript-eslint` 8.71.1 exige `typescript <6.1.0`. Está en la deuda técnica del roadmap.
 
 ## Comandos
 

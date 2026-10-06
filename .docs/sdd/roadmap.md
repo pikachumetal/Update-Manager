@@ -14,7 +14,6 @@
 | B2 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** Decidir dónde se fija la versión de Bun: `packageManager` `bun@1.3.6`, `engines` `>=1.3` y `.prototools` `1.3` | onboarding SDD, 2026-10-05 |
 | B3 | Progress bars estilo docker durante las actualizaciones | `PLANNING.md` original, fase 5 |
 | B4 | Logs y errores detallados | `PLANNING.md` original, fase 5 |
-| B5 | Pasar a TypeScript 7 cuando `typescript-eslint` lo admita (hoy exige `typescript <6.1.0`) | feature 0001, 2026-10-06 |
 
 ## Deuda técnica
 
@@ -38,6 +37,7 @@
 | pnpm: `um check` muestra un update `[WARN] Using → skips`. Causa: `pnpm outdated -g --json` escribe `[WARN] Using --global skips…` antes del JSON, `parseNpmJsonOutput` falla el `JSON.parse` y devuelve `[]`, y `pnpm.ts` recurre a `parsePnpmTableOutput`, que toma la línea como paquete. Fix: `parseNpmJsonOutput` parsea desde el primer `{` | bajo: ruido en la salida | **Actuar**: patch 0002, tras la 0001 |
 | Provider de proto: parsea la tabla de texto (corta `3.14.8+20261003` a `3.14.8+202`; con un agente en el entorno proto 0.62 escribe NDJSON, de ahí los 2 tests en rojo de `parseProtoOutput`) y actualiza con `proto install <tool>`, que no instala un `newest_version` con sufijo de build (python exige `proto install python 3 --pin`) | medio: proto lista updates que `um` no sabe aplicar | **Actuar**: feature (pasar a `proto outdated --json` y decidir la semántica de instalación y `--pin`) |
 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** `bun run sonar` pasa `%SONAR_TOKEN%` con sintaxis de cmd. Sin verificar si `bun run` lo expande en Windows | bajo | **Esperar 2.º ticket** |
+| TypeScript sigue en 6.0.3: `typescript-eslint` 8.71.1 exige `typescript <6.1.0` y bloquea pasar a TS 7 | bajo: sin impacto en `um`; se pierde el compilador nativo de TS 7 | **Esperar 2.º ticket**: a que `typescript-eslint` admita TS 7 |
 
 ## Patches
 
