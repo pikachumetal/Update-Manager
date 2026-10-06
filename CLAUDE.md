@@ -10,6 +10,11 @@ CLI interactiva (Bun + TypeScript) que consulta y aplica actualizaciones de vari
 - `.docs/sdd/constitution.md`: principios, convenciones (ramas, commits) y reglas de producto. Manda sobre cualquier spec.
 - `.docs/sdd/roadmap.md`: lo próximo, el backlog y la deuda técnica.
 
+## Comandos
+
+- Antes de commitear: `moon run :lint :typecheck :test`. Todo corre con Bun (`bunfig.toml`), sin Node.
+- moon cachea por inputs: cuando cambien dependencias o `tsconfig.json`, añade `--force` para no fiarte de un verde cacheado.
+
 ## Reglas críticas
 
 - `~/.config/update-manager/config.json` es del usuario: un cambio de `ConfigSchema` nunca rompe un fichero ya existente.

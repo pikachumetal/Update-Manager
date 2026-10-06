@@ -14,7 +14,7 @@
 | Formato | Prettier (2 espacios, LF, como `.editorconfig`) | 3.9.9 |
 | Actualizador de dependencias | npm-check-updates | 23.1.0 |
 | Plataforma | Windows (`cmd.exe /c`, `where`, `pwsh`, `gsudo`) | Windows 11 |
-| Distribución | npm, `@pikachu-metal/update-manager`, binarios `um` y `update-manager` (`bin/cli.js`, shebang `bun`) | 1.5.0 |
+| Distribución | Desde el código fuente con `bun link` (binarios `um` y `update-manager`, `bin/cli.js` con shebang `bun`); el paquete `@pikachu-metal/update-manager` no está en npm | 1.5.0 |
 
 - **Solo Bun**: `bunfig.toml` lleva `[run] bun = true`, así que `eslint`, `prettier` y `tsc` corren con Bun aunque su shebang diga `node`. No hay `engines.node`. `@types/node` sí es devDep, porque son los tipos de la API de Node que implementa Bun, y `bun-types` la pide con `*`.
 - **Versiones exactas**: `package.json` no lleva `^` ni `~`, y `bunfig.toml` (`[install] exact = true`) hace que `bun add` también fije la versión exacta. Se suben a mano con `moon run :deps-update`.
