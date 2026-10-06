@@ -10,8 +10,8 @@
 
 | # | Ítem | Origen |
 | --- | --- | --- |
-| **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** B1 | Decidir la indentación: `.prettierrc` (`useTabs: true`) contra `.editorconfig` y el código (2 espacios) | onboarding SDD, 2026-10-05 |
-| **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** B2 | Decidir dónde se fija la versión de Bun: `packageManager` `bun@1.3.6`, `engines` `>=1.3` y `.prototools` `1.3` | onboarding SDD, 2026-10-05 |
+| B1 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** Decidir la indentación: `.prettierrc` (`useTabs: true`) contra `.editorconfig` y el código (2 espacios) | onboarding SDD, 2026-10-05 |
+| B2 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** Decidir dónde se fija la versión de Bun: `packageManager` `bun@1.3.6`, `engines` `>=1.3` y `.prototools` `1.3` | onboarding SDD, 2026-10-05 |
 | B3 | Progress bars estilo docker durante las actualizaciones | `PLANNING.md` original, fase 5 |
 | B4 | Logs y errores detallados | `PLANNING.md` original, fase 5 |
 | B5 | Pasar a TypeScript 7 cuando `typescript-eslint` lo admita (hoy exige `typescript <6.1.0`) | feature 0001, 2026-10-06 |
