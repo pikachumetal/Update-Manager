@@ -4,6 +4,7 @@
 
 | # | Ítem | Estado |
 | --- | --- | --- |
+| 0001 | Tooling con moon, limpieza del repo y documentación al día | 🔄 |
 
 ## Backlog
 
