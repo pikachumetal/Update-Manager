@@ -5,6 +5,8 @@
 | # | Ítem | Estado |
 | --- | --- | --- |
 | 0001 | Tooling con moon, limpieza del repo y documentación al día | ✅ |
+| 0004 | Migrar el sistema de prompts de `@clack/prompts` a ink 8, con componentes propios (MultiSelect agrupado, Select, Confirm), porque `@inkjs/ui` está parado desde 2024-05 y no hay ningún kit de ink mantenido. Añade `react-devtools-core`, que exige `bun build --compile`. Justificación del art. IV: proyecto personal de aprendizaje. Spike: `D:\code\.spikes\update-manager-tui` | ⏳ |
+| 0003 | Progress bars durante las actualizaciones (de B3), tras 0004. Decisiones abiertas: filas en el sitio estilo docker o barra global; streaming de las fases de winget (cambia `runCommand`); providers en paralelo o en secuencia | ⏳ |
 
 ## Backlog
 
@@ -12,7 +14,7 @@
 | --- | --- | --- |
 | B1 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** Decidir la indentación: `.prettierrc` (`useTabs: true`) contra `.editorconfig` y el código (2 espacios) | onboarding SDD, 2026-10-05 |
 | B2 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** Decidir dónde se fija la versión de Bun: `packageManager` `bun@1.3.6`, `engines` `>=1.3` y `.prototools` `1.3` | onboarding SDD, 2026-10-05 |
-| B3 | Progress bars estilo docker durante las actualizaciones | `PLANNING.md` original, fase 5 |
+| B3 | Progress bars estilo docker durante las actualizaciones (promovida a la feature 0003, 2026-10-08) | `PLANNING.md` original, fase 5 |
 | B4 | Logs y errores detallados | `PLANNING.md` original, fase 5 |
 
 ## Deuda técnica
