@@ -16,8 +16,8 @@ created: 2026-10-08
 
 | # | Task | Status | Commit | Notas |
 | --- | --- | --- | --- | --- |
-| 1 | Base ink: dependencias, marco, Spinner y entry de render | done | — | |
-| 2 | `um check` y `um check <provider>` en ink | in_progress | — | |
+| 1 | Base ink: dependencias, marco, Spinner y entry de render | done | f8d61df | |
+| 2 | `um check` y `um check <provider>` en ink | done | — | Ruling: `main().catch((error) => console.error(error))` |
 
 ## Verificación por task
 
@@ -28,3 +28,4 @@ created: 2026-10-08
 
 | Descubierto | Causa raíz | Decisión | Commit |
 | --- | --- | --- | --- |
+| Task 2, smoke 6.5: con ink, `check <provider>` cuyo provider lanza no imprime el error | `main()` monta ink de forma síncrona antes de evaluar `.catch(console.error)`, que captura el `console.error` parcheado por ink y se descarta al desmontar | Arreglado en la task: el handler lee `console.error` al fallar (está en `src/index.ts`, dentro del Scope) | Task 2 |

@@ -14,7 +14,8 @@ import {
 } from "./config";
 import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
-import type { PackageUpdate, UpdateProvider } from "./types";
+import type { CheckFailure, CheckResult, PackageUpdate, UpdateProvider } from "./types";
+import { printCheckError, runCheckView } from "./ui/CheckApp";
 
 const VERSION = "0.1.0";
 
@@ -140,45 +141,53 @@ async function checkInteractive() {
 }
 
 async function checkCommand(providerId?: string) {
-  p.intro(pc.bgCyan(pc.black(" Checking for updates ")));
-
   if (providerId) {
     const provider = providers[providerId];
     if (!provider) {
-      p.log.error(`Provider "${providerId}" not found`);
+      printCheckError(`Provider "${providerId}" not found`);
       return;
     }
 
-    const spinner = p.spinner();
-    spinner.start(`Checking ${provider.name}...`);
-
-    const updates = await provider.checkUpdates();
-    spinner.stop(`${provider.name}: ${updates.length} update(s)`);
-
-    displayUpdates(updates, [providerId]);
+    await runCheckView({
+      spinnerLabel: `Checking ${provider.name}...`,
+      load: async () => ({
+        updates: await provider.checkUpdates(),
+        checkedProviders: [providerId],
+        failures: [],
+      }),
+      doneMessage: (result) => `${provider.name}: ${result.updates.length} update(s)`,
+    });
   } else {
-    const { updates, checkedProviders } = await checkAllProviders();
-    displayUpdates(updates, checkedProviders);
+    await runCheckView({
+      spinnerLabel: "Checking for updates...",
+      load: collectUpdates,
+      doneMessage: (result) => `Found ${result.updates.length} update(s)`,
+    });
   }
 
   await updateLastCheck();
-  p.outro(pc.dim("Done"));
 }
 
-interface CheckResult {
-  updates: PackageUpdate[];
-  checkedProviders: string[];
+async function checkAllProviders(): Promise<Omit<CheckResult, "failures">> {
+  const spinner = p.spinner();
+  spinner.start("Checking for updates...");
+
+  const { updates, checkedProviders, failures } = await collectUpdates();
+  for (const failure of failures) {
+    console.warn(pc.yellow(`  ⚠ ${failure.providerName}: ${failure.message}`));
+  }
+
+  spinner.stop(`Found ${updates.length} update(s)`);
+  return { updates, checkedProviders };
 }
 
-async function checkAllProviders(): Promise<CheckResult> {
+async function collectUpdates(): Promise<CheckResult> {
   const enabledIds = await getEnabledProviders();
   const ignoredPackages = await getIgnoredPackages();
   const installedVersions = await getInstalledVersions();
   const allUpdates: PackageUpdate[] = [];
   const checkedProviders: string[] = [];
-
-  const spinner = p.spinner();
-  spinner.start("Checking for updates...");
+  const failures: CheckFailure[] = [];
 
   // Check all providers in parallel
   const checks = enabledIds.map(async (id) => {
@@ -192,11 +201,10 @@ async function checkAllProviders(): Promise<CheckResult> {
       const updates = await provider.checkUpdates();
       return { id, available: true, updates };
     } catch (error) {
-      console.warn(
-        pc.yellow(
-          `  ⚠ ${provider.name}: ${error instanceof Error ? error.message : "check failed"}`
-        )
-      );
+      failures.push({
+        providerName: provider.name,
+        message: error instanceof Error ? error.message : "check failed",
+      });
       return { id, available: true, updates: [] as PackageUpdate[] };
     }
   });
@@ -220,8 +228,7 @@ async function checkAllProviders(): Promise<CheckResult> {
     }
   }
 
-  spinner.stop(`Found ${allUpdates.length} update(s)`);
-  return { updates: allUpdates, checkedProviders };
+  return { updates: allUpdates, checkedProviders, failures };
 }
 
 function formatStatus(status: string): string {
@@ -697,4 +704,5 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-main().catch(console.error);
+// main() monta ink antes de que se evalúe el handler: hay que leer console.error al fallar, no ahora
+main().catch((error) => console.error(error));
