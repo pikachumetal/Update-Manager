@@ -15,13 +15,13 @@ export interface CheckViewOptions {
 
 const TITLE = "Checking for updates";
 
-const STATUS_BADGES: Partial<Record<PackageStatus, { text: string; color: string }>> = {
+export const STATUS_BADGES: Partial<Record<PackageStatus, { text: string; color: string }>> = {
   pinned: { text: "📌 pinned", color: "yellow" },
   unknown: { text: "❓ unknown", color: "magenta" },
   error: { text: "⚠️ error", color: "red" },
 };
 
-function providerLabel(providerId: string) {
+export function providerLabel(providerId: string) {
   const provider = providers[providerId];
   return { icon: provider?.icon || "📦", name: provider?.name || providerId };
 }
