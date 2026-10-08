@@ -1,7 +1,7 @@
 import { PassThrough, Writable } from "node:stream";
 import { stripVTControlCharacters } from "node:util";
 import type { ReactElement } from "react";
-import { render } from "ink";
+import { type RenderOptions, render } from "ink";
 
 // Un stdin que ink acepta como TTY con raw mode, para escribirle teclas en los tests
 export function createTestStdin(): NodeJS.ReadStream {
@@ -18,14 +18,15 @@ class FrameStream extends Writable {
   columns = 80;
   frame = "";
   _write(chunk: Buffer, _encoding: string, callback: () => void) {
-    this.frame = chunk.toString();
+    // Al desmontar ink escribe un trozo vacío que borraría el último frame
+    if (chunk.toString().trim() !== "") this.frame = chunk.toString();
     callback();
   }
 }
 
 export const tick = () => new Promise((resolve) => setTimeout(resolve, 20));
 
-export async function mountWithKeys(node: ReactElement) {
+export async function mountWithKeys(node: ReactElement, options: RenderOptions = {}) {
   const stdout = new FrameStream();
   const stdin = createTestStdin();
   const app = render(node, {
@@ -34,6 +35,7 @@ export async function mountWithKeys(node: ReactElement) {
     patchConsole: false,
     interactive: true,
     debug: true,
+    ...options,
   });
   await tick();
   const press = async (...keys: string[]) => {

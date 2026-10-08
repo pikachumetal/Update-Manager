@@ -54,8 +54,8 @@ Comandos reales de cada provider (los que verifica el código):
 1. `bin/cli.js` → `src/index.ts#main` lee `argv[2]`. Si no hay comando, entra en modo interactivo (bucle de `p.select`).
 2. Check general (`checkAllProviders`): coge los providers activos de la config, filtra los disponibles (`isAvailable`) y lanza `checkUpdates` de todos en paralelo (`Promise.all`). Si un provider lanza una excepción, lo avisa y sigue.
 3. Filtra ignorados y paquetes cuya versión nueva coincide con `installedVersions`, y luego los muestra agrupados por provider (`displayUpdates`). Ese filtrado no se aplica a `check <provider>` ni a `update <provider>`.
-4. `selectUpdates` (multiselect, con todo marcado por defecto) se salta con `-y`.
-5. `performUpdates`: los `available` se actualizan. Los `pinned` y `unknown` de WinGet se pueden forzar, y ofrece instalar `gsudo` si falta. Se actualiza en secuencia, provider a provider, con `updatePackage(id, { force })`. Cada éxito guarda `installedVersions[id]`.
+4. Selección (con todo marcado por defecto), que se salta con `-y`. `um update` la dibuja en ink (`MultiSelect` en `src/ui/UpdateApp.tsx`), agrupada por provider; el menú interactivo sigue con `selectUpdates` de clack hasta la 0007.
+5. Actualización (`runUpdateFlow` en `src/ui/UpdateApp.tsx` para `um update`; `performUpdates` de clack en el menú hasta la 0007): los `available` se actualizan. Los `pinned` y `unknown` de WinGet se pueden forzar, y ofrece instalar `gsudo` si falta. Se actualiza en secuencia, provider a provider, con `updatePackage(id, { force })`. Cada éxito guarda `installedVersions[id]`. Comportamiento: [`package-update`](capabilities/package-update.md).
 
 `UpdateProvider.updateAll()` existe en todos los providers, pero la CLI no lo llama. `requiresAdmin` se declara pero nadie lo lee.
 
