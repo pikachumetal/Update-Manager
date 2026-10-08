@@ -30,6 +30,13 @@ describe("frame", () => {
     ]);
   });
 
+  test("draws a warning", () => {
+    expect(lines(<Log kind="warn">Found 2 package(s) that require force:</Log>)).toEqual([
+      "│",
+      "▲  Found 2 package(s) that require force:",
+    ]);
+  });
+
   test("draws the outro", () => {
     expect(lines(<Outro>Done</Outro>)).toEqual(["│", "└  Done"]);
   });

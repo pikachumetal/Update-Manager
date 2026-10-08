@@ -54,8 +54,8 @@ Comandos reales de cada provider (los que verifica el código):
 1. `bin/cli.js` → `src/index.ts#main` lee `argv[2]`. Si no hay comando, entra en modo interactivo (bucle de `p.select`).
 2. Check general (`checkAllProviders`): coge los providers activos de la config, filtra los disponibles (`isAvailable`) y lanza `checkUpdates` de todos en paralelo (`Promise.all`). Si un provider lanza una excepción, lo avisa y sigue.
 3. Filtra ignorados y paquetes cuya versión nueva coincide con `installedVersions`, y luego los muestra agrupados por provider (`displayUpdates`). Ese filtrado no se aplica a `check <provider>` ni a `update <provider>`.
-4. `selectUpdates` (multiselect, con todo marcado por defecto) se salta con `-y`.
-5. `performUpdates`: los `available` se actualizan. Los `pinned` y `unknown` de WinGet se pueden forzar, y ofrece instalar `gsudo` si falta. Se actualiza en secuencia, provider a provider, con `updatePackage(id, { force })`. Cada éxito guarda `installedVersions[id]`.
+4. Selección (con todo marcado por defecto), que se salta con `-y`. `um update` la dibuja en ink (`MultiSelect` en `src/ui/UpdateApp.tsx`), agrupada por provider; el menú interactivo sigue con `selectUpdates` de clack hasta la 0007.
+5. Actualización (`runUpdateFlow` en `src/ui/UpdateApp.tsx` para `um update`; `performUpdates` de clack en el menú hasta la 0007): los `available` se actualizan. Los `pinned` y `unknown` de WinGet se pueden forzar, y ofrece instalar `gsudo` si falta. Se actualiza en secuencia, provider a provider, con `updatePackage(id, { force })`. Cada éxito guarda `installedVersions[id]`. Comportamiento: [`package-update`](capabilities/package-update.md).
 
 `UpdateProvider.updateAll()` existe en todos los providers, pero la CLI no lo llama. `requiresAdmin` se declara pero nadie lo lee.
 
@@ -74,4 +74,5 @@ Comandos reales de cada provider (los que verifica el código):
 - (anterior a SDD) — Bun como runtime — TypeScript nativo, gestor de paquetes integrado y `Bun.spawn` para lanzar comandos — `PLANNING.md` original.
 - (anterior a SDD) — @clack/prompts para la UI — consistencia con project-manager y spinners integrados — `PLANNING.md` original.
 - 2026-10-08 — ink se monta con `patchConsole: false` — con el `console` parcheado, lo que escribe la consola mientras ink está montado (el `Cancelled` de Ctrl+C, el error de `main`) sale encima del marco o se pierde al desmontar — `src/ui/render.tsx`, feature 0005.
+- 2026-10-08 — Una vista de ink que termina sola sale desde un efecto tras el commit del último estado, y con stdout TTY dibuja en `<Static>` lo ya hecho — un `exit()` justo tras un `setState` desmonta antes de dibujarlo; sin `<Static>`, un frame más alto que la terminal se repinta entero en cada tick en Windows, y sin TTY `<Static>` duplica los últimos bloques — `src/ui/UpdateApp.tsx`, feature 0006.
 - 2026-10-06 — moon orquesta y `package.json` define — moon llama a los scripts con `bun run`, así que `bun run <script>` sigue funcionando — feature 0001.

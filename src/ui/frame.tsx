@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Box, Text } from "ink";
 
-export type LogKind = "step" | "info" | "success" | "error";
+export type LogKind = "step" | "info" | "success" | "error" | "warn";
 
 // Símbolos y colores calcados de @clack/prompts para que check se vea igual que los comandos que aún lo usan
 const LOG_SYMBOLS: Record<LogKind, { symbol: string; color: string }> = {
@@ -9,6 +9,7 @@ const LOG_SYMBOLS: Record<LogKind, { symbol: string; color: string }> = {
   info: { symbol: "●", color: "blue" },
   success: { symbol: "◆", color: "green" },
   error: { symbol: "■", color: "red" },
+  warn: { symbol: "▲", color: "yellow" },
 };
 
 export function Intro({ title }: { title: string }) {

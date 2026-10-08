@@ -1,7 +1,11 @@
 import { expect, test } from "bun:test";
 import { stripVTControlCharacters } from "node:util";
 import { renderToString } from "ink";
-import { Spinner } from "./Spinner";
+import { Spinner, SpinnerFrame } from "./Spinner";
+
+test("draws only the frame", () => {
+  expect(stripVTControlCharacters(renderToString(<SpinnerFrame />))).toBe("◒");
+});
 
 test("draws the first frame and the label", () => {
   const output = stripVTControlCharacters(

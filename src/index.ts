@@ -16,6 +16,7 @@ import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
 import type { CheckFailure, CheckResult, PackageUpdate, UpdateProvider } from "./types";
 import { printCheckError, runCheckView } from "./ui/CheckApp";
+import { runUpdateView, type UpdateViewOptions } from "./ui/UpdateApp";
 
 const VERSION = "0.1.0";
 
@@ -360,50 +361,58 @@ async function updateInteractive() {
 }
 
 async function updateCommand(providerId?: string, skipConfirm = false) {
-  p.intro(pc.bgCyan(pc.black(" Updating packages ")));
-
-  let updates: PackageUpdate[];
-  let checkedProviders: string[];
-
-  if (providerId) {
-    const provider = providers[providerId];
-    if (!provider) {
-      p.log.error(`Provider "${providerId}" not found`);
-      return;
-    }
-
-    const spinner = p.spinner();
-    spinner.start(`Checking ${provider.name}...`);
-    updates = await provider.checkUpdates();
-    checkedProviders = [providerId];
-    spinner.stop(`Found ${updates.length} update(s)`);
-  } else {
-    const result = await checkAllProviders();
-    updates = result.updates;
-    checkedProviders = result.checkedProviders;
-  }
-
-  if (updates.length === 0) {
-    p.outro(pc.dim("Done"));
+  const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+  if (!skipConfirm && !interactive) {
+    console.error("Interactive terminal required (use --yes)");
+    process.exitCode = 1;
     return;
   }
 
-  displayUpdates(updates, checkedProviders);
-
-  let selectedUpdates = updates;
-
-  if (!skipConfirm) {
-    const selection = await selectUpdates(updates);
-    if (!selection || selection.length === 0) {
-      p.log.info("Update cancelled");
-      p.outro(pc.dim("Cancelled"));
-      return;
-    }
-    selectedUpdates = selection;
+  const provider = providerId ? providers[providerId] : undefined;
+  if (providerId && !provider) {
+    printCheckError(`Provider "${providerId}" not found`, "Updating packages");
+    return;
   }
 
-  await performUpdates(selectedUpdates);
-  p.outro(pc.dim("Done"));
+  const outcome = await runUpdateView(updateViewOptions(provider, interactive, skipConfirm));
+  if (outcome === "cancelled") cancel();
+}
+
+function updateViewOptions(
+  provider: UpdateProvider | undefined,
+  interactive: boolean,
+  skipConfirm: boolean
+): UpdateViewOptions {
+  return {
+    spinnerLabel: provider ? `Checking ${provider.name}...` : "Checking for updates...",
+    load: provider
+      ? async () => ({
+          updates: await provider.checkUpdates(),
+          checkedProviders: [provider.id],
+          failures: [],
+        })
+      : collectUpdates,
+    interactive,
+    skipSelection: skipConfirm,
+    hasGsudo: () => commandExists("gsudo"),
+    installGsudo,
+    updatePackage: updateOnePackage,
+  };
+}
+
+async function installGsudo(): Promise<boolean> {
+  const result = await runCommand(
+    ["winget", "install", "gerardog.gsudo", "--silent", "--accept-package-agreements"],
+    { timeout: 120000 }
+  );
+  return result.success;
+}
+
+async function updateOnePackage(update: PackageUpdate, force: boolean): Promise<boolean> {
+  const success = await providers[update.provider].updatePackage(update.id, { force });
+  // Se guarda la versión para no volver a ofrecer paquetes cuya versión el gestor reporta mal
+  if (success) await setInstalledVersion(update.id, update.newVersion);
+  return success;
 }
 
 async function performUpdates(updates: PackageUpdate[]) {
@@ -698,10 +707,12 @@ async function listIgnoredCommand() {
   console.log();
 }
 
-// Handle Ctrl+C gracefully
-process.on("SIGINT", () => {
+function cancel(): never {
   console.log(pc.dim("\nCancelled"));
   process.exit(0);
-});
+}
+
+// Handle Ctrl+C gracefully
+process.on("SIGINT", cancel);
 
 main().catch(console.error);

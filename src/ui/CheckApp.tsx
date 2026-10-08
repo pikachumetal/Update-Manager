@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Box, Text, renderToString, useApp, useStderr } from "ink";
 import pc from "picocolors";
 import { providers } from "../providers";
-import type { CheckResult, PackageStatus, PackageUpdate } from "../types";
+import type { CheckFailure, CheckResult, PackageStatus, PackageUpdate } from "../types";
 import { Intro, Log, Outro } from "./frame";
 import { renderApp } from "./render";
 import { Spinner } from "./Spinner";
@@ -15,13 +15,13 @@ export interface CheckViewOptions {
 
 const TITLE = "Checking for updates";
 
-const STATUS_BADGES: Partial<Record<PackageStatus, { text: string; color: string }>> = {
+export const STATUS_BADGES: Partial<Record<PackageStatus, { text: string; color: string }>> = {
   pinned: { text: "📌 pinned", color: "yellow" },
   unknown: { text: "❓ unknown", color: "magenta" },
   error: { text: "⚠️ error", color: "red" },
 };
 
-function providerLabel(providerId: string) {
+export function providerLabel(providerId: string) {
   const provider = providers[providerId];
   return { icon: provider?.icon || "📦", name: provider?.name || providerId };
 }
@@ -95,7 +95,13 @@ function Summary({ updates }: { updates: PackageUpdate[] }) {
   );
 }
 
-export function CheckReport({ doneMessage, result }: { doneMessage: string; result: CheckResult }) {
+export function UpdatesFound({
+  doneMessage,
+  result,
+}: {
+  doneMessage: string;
+  result: CheckResult;
+}) {
   const grouped = Map.groupBy(result.updates, (update) => update.provider);
   const upToDate = result.checkedProviders.filter((id) => !grouped.has(id));
 
@@ -111,26 +117,44 @@ export function CheckReport({ doneMessage, result }: { doneMessage: string; resu
       ))}
       <Text> </Text>
       <Summary updates={result.updates} />
+    </Box>
+  );
+}
+
+export function CheckReport({ doneMessage, result }: { doneMessage: string; result: CheckResult }) {
+  return (
+    <Box flexDirection="column">
+      <UpdatesFound doneMessage={doneMessage} result={result} />
       <Outro>Done</Outro>
     </Box>
   );
 }
 
+export function useFailureWarnings() {
+  const { stderr, write } = useStderr();
+  return useCallback(
+    (failures: CheckFailure[]) => {
+      // El aviso va por stderr para que `um check > out.txt` solo guarde el resultado
+      const { yellow } = pc.createColors("isTTY" in stderr && Boolean(stderr.isTTY));
+      for (const failure of failures) {
+        write(yellow(`  ⚠ ${failure.providerName}: ${failure.message}`) + "\n");
+      }
+    },
+    [stderr, write]
+  );
+}
+
 function useCheckResult(load: CheckViewOptions["load"]) {
   const { exit } = useApp();
-  const { stderr, write } = useStderr();
+  const warnFailures = useFailureWarnings();
   const [result, setResult] = useState<CheckResult | null>(null);
 
   useEffect(() => {
-    // El aviso va por stderr para que `um check > out.txt` solo guarde el resultado
-    const { yellow } = pc.createColors("isTTY" in stderr && Boolean(stderr.isTTY));
     load().then((loaded) => {
-      for (const failure of loaded.failures) {
-        write(yellow(`  ⚠ ${failure.providerName}: ${failure.message}`) + "\n");
-      }
+      warnFailures(loaded.failures);
       setResult(loaded);
     }, exit);
-  }, [load, exit, stderr, write]);
+  }, [load, exit, warnFailures]);
 
   useEffect(() => {
     if (result) exit();
@@ -156,10 +180,10 @@ export function CheckApp({ spinnerLabel, load, doneMessage }: CheckViewOptions) 
   );
 }
 
-export function CheckError({ message }: { message: string }) {
+export function CheckError({ message, title = TITLE }: { message: string; title?: string }) {
   return (
     <Box flexDirection="column">
-      <Intro title={TITLE} />
+      <Intro title={title} />
       <Log kind="error">{message}</Log>
     </Box>
   );
@@ -169,6 +193,6 @@ export function runCheckView(options: CheckViewOptions): Promise<void> {
   return renderApp(<CheckApp {...options} />);
 }
 
-export function printCheckError(message: string): void {
-  process.stdout.write(renderToString(<CheckError message={message} />) + "\n");
+export function printCheckError(message: string, title?: string): void {
+  process.stdout.write(renderToString(<CheckError message={message} title={title} />) + "\n");
 }
