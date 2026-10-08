@@ -5,8 +5,10 @@
 | # | Ítem | Estado |
 | --- | --- | --- |
 | 0001 | Tooling con moon, limpieza del repo y documentación al día | ✅ |
-| 0004 | Migrar el sistema de prompts de `@clack/prompts` a ink 8, con componentes propios (MultiSelect agrupado, Select, Confirm), porque `@inkjs/ui` está parado desde 2024-05 y no hay ningún kit de ink mantenido. Añade `react-devtools-core`, que exige `bun build --compile`. Justificación del art. IV: proyecto personal de aprendizaje. Spike: `D:\code\.spikes\update-manager-tui` | ⏳ |
-| 0003 | Progress bars durante las actualizaciones (de B3), tras 0004. Decisiones abiertas: filas en el sitio estilo docker o barra global; streaming de las fases de winget (cambia `runCommand`); providers en paralelo o en secuencia | ⏳ |
+| 0005 | Base ink + `um check`: ink 8, entry de render, `bun build --compile` con `react-devtools-core`, Spinner propio · `proposal: 0004` | ⏳ |
+| 0006 | `um update` en ink: MultiSelect agrupado, Confirm de force/gsudo y progreso por paquete, tras 0005 · `proposal: 0004` | ⏳ |
+| 0007 | Menú interactivo, `providers` e `ignore` en ink; fuera `@clack/prompts`, tras 0006 · `proposal: 0004` | ⏳ |
+| 0003 | Progress bars durante las actualizaciones (de B3) | ⏸️ aparcada: absorbida por la propuesta 0004 (feature 0006), 2026-10-08 |
 
 ## Backlog
 
