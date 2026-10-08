@@ -30,6 +30,17 @@ export interface PackageUpdate {
   notes?: string;
 }
 
+export interface CheckFailure {
+  providerName: string;
+  message: string;
+}
+
+export interface CheckResult {
+  updates: PackageUpdate[];
+  checkedProviders: string[];
+  failures: CheckFailure[];
+}
+
 export interface UpdateResult {
   success: boolean;
   updated: string[];
