@@ -62,6 +62,15 @@ function UpToDateProvider({ providerId }: { providerId: string }) {
   );
 }
 
+function summaryParts(updates: PackageUpdate[]) {
+  const count = (status: PackageStatus) => updates.filter((u) => u.status === status).length;
+  return [
+    { count: count("available"), label: "available", color: "green" },
+    { count: count("pinned"), label: "pinned", color: "yellow" },
+    { count: count("unknown"), label: "unknown", color: "magenta" },
+  ].filter((part) => part.count > 0);
+}
+
 function Summary({ updates }: { updates: PackageUpdate[] }) {
   if (updates.length === 0) {
     return (
@@ -71,17 +80,10 @@ function Summary({ updates }: { updates: PackageUpdate[] }) {
     );
   }
 
-  const count = (status: PackageStatus) => updates.filter((u) => u.status === status).length;
-  const parts = [
-    { count: count("available"), label: "available", color: "green" },
-    { count: count("pinned"), label: "pinned", color: "yellow" },
-    { count: count("unknown"), label: "unknown", color: "magenta" },
-  ].filter((part) => part.count > 0);
-
   return (
     <Log kind="info">
       Summary:{" "}
-      {parts.map((part, index) => (
+      {summaryParts(updates).map((part, index) => (
         <Text key={part.label}>
           {index > 0 && " | "}
           <Text color={part.color}>
@@ -114,7 +116,7 @@ export function CheckReport({ doneMessage, result }: { doneMessage: string; resu
   );
 }
 
-export function CheckApp({ spinnerLabel, load, doneMessage }: CheckViewOptions) {
+function useCheckResult(load: CheckViewOptions["load"]) {
   const { exit } = useApp();
   const { stderr, write } = useStderr();
   const [result, setResult] = useState<CheckResult | null>(null);
@@ -134,6 +136,11 @@ export function CheckApp({ spinnerLabel, load, doneMessage }: CheckViewOptions) 
     if (result) exit();
   }, [result, exit]);
 
+  return result;
+}
+
+export function CheckApp({ spinnerLabel, load, doneMessage }: CheckViewOptions) {
+  const result = useCheckResult(load);
   return (
     <Box flexDirection="column">
       <Intro title={TITLE} />

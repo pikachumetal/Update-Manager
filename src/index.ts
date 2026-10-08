@@ -704,5 +704,4 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-// main() monta ink antes de que se evalúe el handler: hay que leer console.error al fallar, no ahora
-main().catch((error) => console.error(error));
+main().catch(console.error);

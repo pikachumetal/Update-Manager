@@ -7,7 +7,8 @@
 | Runtime, gestor de paquetes y test runner | Bun (`.prototools`; `packageManager` y `engines.bun` alineados) | 1.4.2 |
 | Orquestación de tareas | moon (`.prototools`, `.moon/workspace.yml`, `moon.yml`) | 2.6.0 |
 | Lenguaje | TypeScript (`strict`, `moduleResolution: bundler`) | 6.0.3 |
-| UI de terminal | @clack/prompts | 1.8.1 |
+| UI de terminal | ink (React para terminal) + React; `react-devtools-core` porque `bun build --compile` la exige con ink. `um check` ya va en ink ([`update-check`](capabilities/update-check.md)); el resto de comandos sigue en @clack/prompts hasta la 0007 | 8.0.0 / 19.3.0 / 8.0.0 |
+| UI de terminal (en retirada) | @clack/prompts | 1.8.1 |
 | Colores | picocolors | 1.1.1 |
 | Validación de la config | zod | 4.6.5 |
 | Lint | ESLint (flat config) + @typescript-eslint | 10.12.0 / 8.71.1 |
@@ -33,7 +34,7 @@ Cada tarea de moon ejecuta su script de `package.json` con `bun run`:
 
 ## Testing
 
-TDD con `bun test` para la lógica pura: los parsers de salida de cada gestor viven en `src/providers/parsers.ts` y se prueban en `src/providers/parsers.test.ts`. La parte que lanza procesos (`runCommand`, `updatePackage`, el flujo de `index.ts`) no tiene tests. Se verifica con smoke manual: `um check` y, si el cambio toca actualizaciones, `um update <provider>` en la máquina real. No hay CI.
+TDD con `bun test` para la lógica pura y la vista de ink (`src/ui/*.test.tsx`, con `renderToString` de ink, sin `ink-testing-library`): los parsers de salida de cada gestor viven en `src/providers/parsers.ts` y se prueban en `src/providers/parsers.test.ts`. La parte que lanza procesos (`runCommand`, `updatePackage`, el flujo de `index.ts`) no tiene tests. Se verifica con smoke manual: `um check` y, si el cambio toca actualizaciones, `um update <provider>` en la máquina real. No hay CI.
 
 ## Decisiones abiertas
 
