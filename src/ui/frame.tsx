@@ -3,7 +3,7 @@ import { Box, Text } from "ink";
 
 export type LogKind = "step" | "info" | "success" | "error" | "warn";
 
-// Símbolos y colores calcados de @clack/prompts para que check se vea igual que los comandos que aún lo usan
+// Símbolos y colores del marco de la CLI: cada vista abre con ┌ y cierra con └
 const LOG_SYMBOLS: Record<LogKind, { symbol: string; color: string }> = {
   step: { symbol: "◇", color: "green" },
   info: { symbol: "●", color: "blue" },

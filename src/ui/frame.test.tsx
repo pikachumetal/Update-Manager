@@ -10,7 +10,7 @@ const lines = (node: ReactElement) =>
     .map((l) => l.trimEnd());
 
 describe("frame", () => {
-  test("draws the intro like clack", () => {
+  test("draws the intro", () => {
     expect(lines(<Intro title="Checking for updates" />)).toEqual(["┌   Checking for updates"]);
   });
 

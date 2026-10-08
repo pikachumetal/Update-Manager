@@ -10,7 +10,7 @@ En Windows, mantener al día un equipo de desarrollo obliga a recorrer varios ge
 
 ## Qué es y qué no es
 
-- **Es**: una CLI interactiva (Bun + @clack/prompts) que delega en los comandos de cada gestor instalado: consulta, lista, selecciona y actualiza paquetes. Guarda su estado en `~/.config/update-manager/config.json`.
+- **Es**: una CLI interactiva (Bun + ink) que delega en los comandos de cada gestor instalado: consulta, lista, selecciona y actualiza paquetes. Guarda su estado en `~/.config/update-manager/config.json`.
 - **No es**: un gestor de paquetes propio, ni sirve para instalar paquetes nuevos (la única excepción es ofrecer instalar `gsudo` para elevar WinGet). No es multiplataforma en la práctica: los comandos y la elevación son de Windows. Tampoco programa actualizaciones ni corre como servicio.
 
 ## Dominio (lenguaje del proyecto)

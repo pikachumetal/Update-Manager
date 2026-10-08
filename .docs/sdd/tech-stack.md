@@ -7,8 +7,7 @@
 | Runtime, gestor de paquetes y test runner | Bun (`.prototools`; `packageManager` y `engines.bun` alineados) | 1.4.2 |
 | Orquestación de tareas | moon (`.prototools`, `.moon/workspace.yml`, `moon.yml`) | 2.6.0 |
 | Lenguaje | TypeScript (`strict`, `moduleResolution: bundler`) | 6.0.3 |
-| UI de terminal | ink (React para terminal) + React; `react-devtools-core` porque `bun build --compile` la exige con ink. `um check` y `um update` ya van en ink ([`update-check`](capabilities/update-check.md), [`package-update`](capabilities/package-update.md)); el menú interactivo, `providers` e `ignore` siguen en @clack/prompts hasta la 0007 | 8.0.0 / 19.3.0 / 8.0.0 |
-| UI de terminal (en retirada) | @clack/prompts | 1.8.1 |
+| UI de terminal | ink (React para terminal) + React, con prompts propios en `src/ui/`; `react-devtools-core` porque `bun build --compile` la exige con ink. Toda la CLI dibuja con ink ([`update-check`](capabilities/update-check.md), [`package-update`](capabilities/package-update.md), [`interactive-menu`](capabilities/interactive-menu.md)); `providers`, `ignore`, `unignore` e `ignored` escriben con `console.log` y picocolors ([`settings`](capabilities/settings.md)) | 8.0.0 / 19.3.0 / 8.0.0 |
 | Colores | picocolors | 1.1.1 |
 | Validación de la config | zod | 4.6.5 |
 | Lint | ESLint (flat config) + @typescript-eslint | 10.12.0 / 8.71.1 |
