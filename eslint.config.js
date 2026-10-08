@@ -7,7 +7,7 @@ export default [
     ignores: ["bin/", "dist/", "node_modules/", "*.js", "bun.lock"],
   },
   {
-    files: ["src/**/*.ts"],
+    files: ["src/**/*.{ts,tsx}"],
     languageOptions: {
       parser: parser,
       parserOptions: {

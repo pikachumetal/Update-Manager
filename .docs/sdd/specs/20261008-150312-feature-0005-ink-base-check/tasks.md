@@ -16,8 +16,8 @@ created: 2026-10-08
 
 | # | Task | Status | Commit | Notas |
 | --- | --- | --- | --- | --- |
-| 1 | Base ink: dependencias, marco, Spinner y entry de render | pending | — | |
-| 2 | `um check` y `um check <provider>` en ink | pending | — | |
+| 1 | Base ink: dependencias, marco, Spinner y entry de render | done | — | |
+| 2 | `um check` y `um check <provider>` en ink | in_progress | — | |
 
 ## Verificación por task
 
