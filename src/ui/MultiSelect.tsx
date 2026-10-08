@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Box, Text, useInput, useStdin } from "ink";
 import type { PackageUpdate } from "../types";
 import { STATUS_BADGES, providerLabel } from "./CheckApp";
@@ -15,8 +15,8 @@ const groupByProvider = (updates: PackageUpdate[]) =>
 // Un mismo id puede venir de dos providers (typescript en npm y en bun)
 const rowKey = (update: PackageUpdate) => `${update.provider}:${update.id}`;
 
-function useChecked(updates: PackageUpdate[]) {
-  const [checked, setChecked] = useState(() => new Set(updates.map(rowKey)));
+function useChecked(keys: string[], initial: string[]) {
+  const [checked, setChecked] = useState(() => new Set(initial));
   const toggle = (key: string) =>
     setChecked((current) => {
       const next = new Set(current);
@@ -24,32 +24,46 @@ function useChecked(updates: PackageUpdate[]) {
       return next;
     });
   const toggleAll = () =>
-    setChecked((current) =>
-      current.size === updates.length ? new Set() : new Set(updates.map(rowKey))
-    );
+    setChecked((current) => (current.size === keys.length ? new Set() : new Set(keys)));
   return { checked, toggle, toggleAll };
 }
 
-function useSelection(updates: PackageUpdate[], onSubmit: MultiSelectProps["onSubmit"]) {
-  // El cursor recorre las filas en el orden en que se ven, agrupadas por provider
-  const rows = [...groupByProvider(updates).values()].flat();
+// `keys` va en el orden en que se ven las filas: es el que recorre el cursor
+function useCheckList(
+  keys: string[],
+  initial: string[],
+  onSubmit: (checked: Set<string>) => void,
+  required = false
+) {
   const { isRawModeSupported } = useStdin();
   const [cursor, setCursor] = useState(0);
-  const { checked, toggle, toggleAll } = useChecked(updates);
+  const [error, setError] = useState(false);
+  const { checked, toggle, toggleAll } = useChecked(keys, initial);
   const move = (step: number) =>
-    setCursor((current) => (current + step + rows.length) % rows.length);
+    setCursor((current) => (current + step + keys.length) % keys.length);
 
   useInput(
     (input, key) => {
+      setError(false);
       if (key.upArrow) move(-1);
       else if (key.downArrow) move(1);
-      else if (input === " ") toggle(rowKey(rows[cursor]));
+      else if (input === " ") toggle(keys[cursor]);
       else if (input === "a") toggleAll();
-      else if (key.return) onSubmit(updates.filter((u) => checked.has(rowKey(u))));
+      else if (key.return && required && checked.size === 0) setError(true);
+      else if (key.return) onSubmit(checked);
     },
     { isActive: isRawModeSupported }
   );
 
+  return { cursor, checked, error };
+}
+
+function useSelection(updates: PackageUpdate[], onSubmit: MultiSelectProps["onSubmit"]) {
+  const rows = [...groupByProvider(updates).values()].flat();
+  const keys = rows.map(rowKey);
+  const { cursor, checked } = useCheckList(keys, keys, (selected) =>
+    onSubmit(updates.filter((u) => selected.has(rowKey(u))))
+  );
   return { rows, cursor, checked };
 }
 
@@ -109,6 +123,60 @@ export function MultiSelect({ message, updates, onSubmit }: MultiSelectProps) {
         );
       })}
       <Text color="gray">└</Text>
+    </Box>
+  );
+}
+
+export interface CheckOption<T> {
+  value: T;
+  label: ReactNode;
+  hint?: string;
+  checked: boolean;
+}
+
+export function CheckList<T>({
+  message,
+  options,
+  required,
+  onSubmit,
+}: {
+  message: string;
+  options: CheckOption<T>[];
+  required?: boolean;
+  onSubmit: (selected: T[]) => void;
+}) {
+  const keys = options.map((_, index) => String(index));
+  const initial = keys.filter((_, index) => options[index].checked);
+  const { cursor, checked, error } = useCheckList(
+    keys,
+    initial,
+    (selected) =>
+      onSubmit(options.filter((_, index) => selected.has(String(index))).map((o) => o.value)),
+    required
+  );
+
+  return (
+    <Box flexDirection="column">
+      <Text color="gray">│</Text>
+      <Text>
+        <Text color="cyan">◆</Text>
+        {"  "}
+        {message}
+      </Text>
+      {options.map((option, index) => (
+        <Text key={keys[index]}>
+          <Text color="gray">│</Text>
+          {"  "}
+          {checked.has(keys[index]) ? <Text color="cyan">◼</Text> : <Text dimColor>◻</Text>}{" "}
+          <Text color={index === cursor ? "cyan" : undefined}>{option.label}</Text>
+          {index === cursor && option.hint && <Text dimColor> ({option.hint})</Text>}
+        </Text>
+      ))}
+      {error ? (
+        <Text color="yellow">{"└  Please select at least one option."}</Text>
+      ) : (
+        <Text color="gray">└</Text>
+      )}
     </Box>
   );
 }

@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-import * as p from "@clack/prompts";
 import pc from "picocolors";
 import {
   loadConfig,
@@ -16,6 +15,15 @@ import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
 import type { CheckFailure, CheckResult, PackageUpdate, UpdateProvider } from "./types";
 import { printCheckError, runCheckView } from "./ui/CheckApp";
+import {
+  printIntro,
+  printLog,
+  printOutro,
+  runMenu,
+  runProviderSelect,
+  runProvidersToggle,
+  type MenuAction,
+} from "./ui/menu";
 import { runUpdateView, type UpdateViewOptions } from "./ui/UpdateApp";
 
 const VERSION = "0.1.0";
@@ -97,48 +105,41 @@ ${pc.dim("Examples:")}
 }
 
 async function interactiveMode() {
-  console.clear();
+  if (!isInteractive()) {
+    console.error("Interactive terminal required (see um --help)");
+    process.exitCode = 1;
+    return;
+  }
 
-  p.intro(pc.bgCyan(pc.black(" Update Manager ")));
+  console.clear();
+  printIntro("Update Manager");
 
   while (true) {
-    const action = await p.select({
-      message: "What would you like to do?",
-      options: [
-        { value: "check", label: `${pc.cyan("🔍")} Check for updates` },
-        { value: "update", label: `${pc.green("🔄")} Update all` },
-        { value: "updateProvider", label: `${pc.yellow("📦")} Update by provider` },
-        { value: "providers", label: `${pc.magenta("⚙️")}  Manage providers` },
-        { value: "exit", label: `${pc.dim("🚪")} Exit` },
-      ],
-    });
-
-    if (p.isCancel(action) || action === "exit") {
-      p.outro("Bye! 👋");
+    const action = await runMenu();
+    if (action === undefined) cancel();
+    if (action === "exit") {
+      printOutro("Bye! 👋");
       process.exit(0);
     }
-
-    switch (action) {
-      case "check":
-        await checkInteractive();
-        break;
-      case "update":
-        await updateInteractive();
-        break;
-      case "updateProvider":
-        await updateByProviderInteractive();
-        break;
-      case "providers":
-        await providersInteractive();
-        break;
-    }
+    await runMenuAction(action);
   }
 }
 
-async function checkInteractive() {
-  const { updates, checkedProviders } = await checkAllProviders();
-  displayUpdates(updates, checkedProviders);
-  await updateLastCheck();
+async function runMenuAction(action: Exclude<MenuAction, "exit">) {
+  switch (action) {
+    case "check":
+      return checkCommand();
+    case "update":
+      return updateCommand();
+    case "updateProvider":
+      return updateByProviderInteractive();
+    case "providers":
+      return providersInteractive();
+  }
+}
+
+function isInteractive(): boolean {
+  return Boolean(process.stdin.isTTY && process.stdout.isTTY);
 }
 
 async function checkCommand(providerId?: string) {
@@ -167,19 +168,6 @@ async function checkCommand(providerId?: string) {
   }
 
   await updateLastCheck();
-}
-
-async function checkAllProviders(): Promise<Omit<CheckResult, "failures">> {
-  const spinner = p.spinner();
-  spinner.start("Checking for updates...");
-
-  const { updates, checkedProviders, failures } = await collectUpdates();
-  for (const failure of failures) {
-    console.warn(pc.yellow(`  ⚠ ${failure.providerName}: ${failure.message}`));
-  }
-
-  spinner.stop(`Found ${updates.length} update(s)`);
-  return { updates, checkedProviders };
 }
 
 async function collectUpdates(): Promise<CheckResult> {
@@ -232,136 +220,8 @@ async function collectUpdates(): Promise<CheckResult> {
   return { updates: allUpdates, checkedProviders, failures };
 }
 
-function formatStatus(status: string): string {
-  switch (status) {
-    case "pinned":
-      return pc.yellow("📌 pinned");
-    case "unknown":
-      return pc.magenta("❓ unknown");
-    case "error":
-      return pc.red("⚠️ error");
-    default:
-      return "";
-  }
-}
-
-function displayUpdates(updates: PackageUpdate[], checkedProviders: string[]) {
-  // Group by provider
-  const grouped = updates.reduce(
-    (acc, update) => {
-      if (!acc[update.provider]) {
-        acc[update.provider] = [];
-      }
-      acc[update.provider].push(update);
-      return acc;
-    },
-    {} as Record<string, PackageUpdate[]>
-  );
-
-  // Find providers with no updates
-  const providersWithUpdates = new Set(Object.keys(grouped));
-  const providersWithoutUpdates = checkedProviders.filter((id) => !providersWithUpdates.has(id));
-
-  // Count by status
-  const available = updates.filter((u) => u.status === "available").length;
-  const pinned = updates.filter((u) => u.status === "pinned").length;
-  const unknown = updates.filter((u) => u.status === "unknown").length;
-
-  console.log();
-
-  // Show providers with updates
-  for (const [providerId, providerUpdates] of Object.entries(grouped)) {
-    const provider = providers[providerId];
-    const icon = provider?.icon || "📦";
-    const name = provider?.name || providerId;
-
-    console.log(pc.bold(`${icon} ${name}`));
-
-    for (const update of providerUpdates) {
-      const statusBadge = update.status !== "available" ? ` ${formatStatus(update.status)}` : "";
-      const source = update.source ? pc.dim(` [${update.source}]`) : "";
-
-      console.log(
-        `   ${pc.dim("•")} ${update.name} ${pc.dim(update.currentVersion)} ${pc.yellow("→")} ${pc.green(update.newVersion)}${statusBadge}${source}`
-      );
-    }
-  }
-
-  // Show providers without updates
-  if (providersWithoutUpdates.length > 0) {
-    for (const providerId of providersWithoutUpdates) {
-      const provider = providers[providerId];
-      const icon = provider?.icon || "📦";
-      const name = provider?.name || providerId;
-      console.log(`${icon} ${pc.dim(name)} ${pc.green("✓")}`);
-    }
-  }
-
-  console.log();
-
-  // Summary
-  if (updates.length === 0) {
-    p.log.success(pc.green("Everything is up to date!"));
-    return;
-  }
-
-  const parts: string[] = [];
-  if (available > 0) parts.push(pc.green(`${available} available`));
-  if (pinned > 0) parts.push(pc.yellow(`${pinned} pinned`));
-  if (unknown > 0) parts.push(pc.magenta(`${unknown} unknown`));
-
-  if (parts.length > 0) {
-    p.log.info(`Summary: ${parts.join(" | ")}`);
-  }
-}
-
-async function selectUpdates(updates: PackageUpdate[]): Promise<PackageUpdate[] | null> {
-  if (updates.length === 0) return [];
-
-  // Group by provider for better display
-  const options = updates.map((u) => {
-    const provider = providers[u.provider];
-    const icon = provider?.icon || "📦";
-    const statusBadge = u.status !== "available" ? ` ${formatStatus(u.status)}` : "";
-
-    return {
-      value: u.id,
-      label: `${icon} ${u.name} ${pc.dim(u.currentVersion)} → ${pc.green(u.newVersion)}${statusBadge}`,
-      hint: u.provider,
-    };
-  });
-
-  const selected = await p.multiselect({
-    message: "Select packages to update (space to toggle, enter to confirm)",
-    options,
-    initialValues: updates.map((u) => u.id),
-    required: false,
-  });
-
-  if (p.isCancel(selected)) return null;
-
-  const selectedIds = new Set(selected as string[]);
-  return updates.filter((u) => selectedIds.has(u.id));
-}
-
-async function updateInteractive() {
-  const { updates } = await checkAllProviders();
-
-  if (updates.length === 0) {
-    return;
-  }
-
-  const selectedUpdates = await selectUpdates(updates);
-  if (!selectedUpdates || selectedUpdates.length === 0) {
-    p.log.info("Update cancelled");
-    return;
-  }
-
-  await performUpdates(selectedUpdates);
-}
-
 async function updateCommand(providerId?: string, skipConfirm = false) {
-  const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
+  const interactive = isInteractive();
   if (!skipConfirm && !interactive) {
     console.error("Interactive terminal required (use --yes)");
     process.exitCode = 1;
@@ -415,133 +275,6 @@ async function updateOnePackage(update: PackageUpdate, force: boolean): Promise<
   return success;
 }
 
-async function performUpdates(updates: PackageUpdate[]) {
-  // Separate by status
-  const toUpdate = updates.filter((u) => u.status === "available");
-  const skippable = updates.filter((u) => u.status === "pinned" || u.status === "unknown");
-
-  // Track packages to force update
-  let forceUpdates: PackageUpdate[] = [];
-  let finalSkipped = skippable;
-
-  // Show skipped packages and ask if user wants to force
-  if (skippable.length > 0) {
-    console.log();
-    p.log.warn(`Found ${skippable.length} package(s) that require force:`);
-    for (const pkg of skippable) {
-      const reason = pkg.status === "pinned" ? "pinned" : "unknown version";
-      console.log(`   ${pc.dim("•")} ${pkg.name} ${pc.dim(`(${reason})`)}`);
-    }
-
-    // Only ask for WinGet packages (they support --force)
-    const wingetSkippable = skippable.filter((u) => u.provider === "winget");
-    if (wingetSkippable.length > 0) {
-      // Check if gsudo is available for elevation
-      const hasGsudo = await commandExists("gsudo");
-
-      if (!hasGsudo) {
-        const installGsudo = await p.confirm({
-          message: `gsudo not found. Install it for admin elevation?`,
-        });
-
-        if (!p.isCancel(installGsudo) && installGsudo) {
-          const spinner = p.spinner();
-          spinner.start("Installing gsudo...");
-          const result = await runCommand(
-            ["winget", "install", "gerardog.gsudo", "--silent", "--accept-package-agreements"],
-            { timeout: 120000 }
-          );
-          if (result.success) {
-            spinner.stop(pc.green("gsudo installed"));
-          } else {
-            spinner.stop(pc.red("Failed to install gsudo"));
-          }
-        }
-      }
-
-      const forceConfirm = await p.confirm({
-        message: `Force update ${wingetSkippable.length} WinGet package(s)?`,
-      });
-
-      if (!p.isCancel(forceConfirm) && forceConfirm) {
-        forceUpdates = wingetSkippable;
-        finalSkipped = skippable.filter((u) => u.provider !== "winget");
-      }
-    }
-  }
-
-  const allToUpdate = [...toUpdate, ...forceUpdates];
-
-  if (allToUpdate.length === 0) {
-    p.log.info("No packages to update");
-    return;
-  }
-
-  console.log();
-  p.log.step(`Updating ${allToUpdate.length} package(s)...`);
-  console.log();
-
-  // Group by provider, tracking which need force
-  const grouped = allToUpdate.reduce(
-    (acc, update) => {
-      if (!acc[update.provider]) {
-        acc[update.provider] = [];
-      }
-      acc[update.provider].push({
-        update,
-        force: forceUpdates.includes(update),
-      });
-      return acc;
-    },
-    {} as Record<string, { update: PackageUpdate; force: boolean }[]>
-  );
-
-  let successCount = 0;
-  let failCount = 0;
-
-  for (const [providerId, providerUpdates] of Object.entries(grouped)) {
-    const provider = providers[providerId];
-    if (!provider) continue;
-
-    // Show provider header
-    console.log(pc.dim(`  ${provider.icon} ${provider.name}`));
-
-    for (const { update, force } of providerUpdates) {
-      const spinner = p.spinner();
-      const versionInfo = `${pc.dim(update.currentVersion)} → ${pc.green(update.newVersion)}`;
-      const forceLabel = force ? pc.yellow(" (force)") : "";
-      spinner.start(`${update.name} ${versionInfo}${forceLabel}`);
-
-      try {
-        const success = await provider.updatePackage(update.id, { force });
-        if (success) {
-          spinner.stop(pc.green(`  ✓ ${update.name} ${versionInfo}`));
-          successCount++;
-          // Save installed version to handle packages with version mismatch issues
-          await setInstalledVersion(update.id, update.newVersion);
-        } else {
-          spinner.stop(pc.red(`  ✗ ${update.name} failed`));
-          failCount++;
-        }
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : "Unknown error";
-        spinner.stop(pc.red(`  ✗ ${update.name} ${pc.dim(errorMsg)}`));
-        failCount++;
-      }
-    }
-
-    console.log();
-  }
-
-  // Final summary
-  const summaryParts: string[] = [];
-  if (successCount > 0) summaryParts.push(pc.green(`✓ ${successCount} updated`));
-  if (failCount > 0) summaryParts.push(pc.red(`✗ ${failCount} failed`));
-  if (finalSkipped.length > 0) summaryParts.push(pc.yellow(`⊘ ${finalSkipped.length} skipped`));
-
-  p.log.info(`Result: ${summaryParts.join(" | ")}`);
-}
-
 async function updateByProviderInteractive() {
   const enabledIds = await getEnabledProviders();
   const availableProviders: UpdateProvider[] = [];
@@ -554,40 +287,13 @@ async function updateByProviderInteractive() {
   }
 
   if (availableProviders.length === 0) {
-    p.log.warn("No providers available");
+    printLog("warn", "No providers available");
     return;
   }
 
-  const selected = await p.select({
-    message: "Select provider to update",
-    options: availableProviders.map((p) => ({
-      value: p.id,
-      label: `${p.icon} ${p.name}`,
-    })),
-  });
-
-  if (p.isCancel(selected)) return;
-
-  const provider = providers[selected as string];
-  if (!provider) return;
-
-  const spinner = p.spinner();
-  spinner.start(`Checking ${provider.name}...`);
-
-  const updates = await provider.checkUpdates();
-  spinner.stop(`Found ${updates.length} update(s)`);
-
-  if (updates.length === 0) {
-    p.log.success(`${provider.name} is up to date!`);
-    return;
-  }
-
-  displayUpdates(updates, [selected as string]);
-
-  const selectedUpdates = await selectUpdates(updates);
-  if (!selectedUpdates || selectedUpdates.length === 0) return;
-
-  await performUpdates(selectedUpdates);
+  const provider = await runProviderSelect(availableProviders);
+  if (!provider) cancel();
+  await updateCommand(provider.id);
 }
 
 async function providersInteractive() {
@@ -595,39 +301,20 @@ async function providersInteractive() {
   const available = await getAvailableProviders();
   const availableIds = new Set(available.map((p) => p.id));
 
-  const options = Object.entries(providers).map(([id, provider]) => {
-    const isEnabled = config.providers[id]?.enabled ?? false;
-    const isInstalled = availableIds.has(id);
-    const status = !isInstalled
-      ? pc.dim("(not installed)")
-      : isEnabled
-        ? pc.green("(enabled)")
-        : pc.dim("(disabled)");
+  const ids = await runProvidersToggle(
+    Object.entries(providers).map(([id, provider]) => ({
+      provider,
+      enabled: config.providers[id]?.enabled ?? false,
+      installed: availableIds.has(id),
+    }))
+  );
+  if (!ids) cancel();
 
-    return {
-      value: id,
-      label: `${provider.icon} ${provider.name} ${status}`,
-      hint: isInstalled ? undefined : "not available",
-    };
-  });
-
-  const selected = await p.multiselect({
-    message: "Toggle providers (space to select, enter to confirm)",
-    options,
-    initialValues: Object.entries(config.providers)
-      .filter(([_, v]) => v.enabled)
-      .map(([k]) => k),
-  });
-
-  if (p.isCancel(selected)) return;
-
-  // Update config
   for (const id of Object.keys(providers)) {
-    const shouldEnable = (selected as string[]).includes(id);
-    await toggleProvider(id, shouldEnable);
+    await toggleProvider(id, ids.includes(id));
   }
 
-  p.log.success("Providers updated");
+  printLog("success", "Providers updated");
 }
 
 async function providersCommand(action?: string, providerId?: string) {

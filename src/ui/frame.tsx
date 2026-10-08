@@ -3,7 +3,7 @@ import { Box, Text } from "ink";
 
 export type LogKind = "step" | "info" | "success" | "error" | "warn";
 
-// Símbolos y colores calcados de @clack/prompts para que check se vea igual que los comandos que aún lo usan
+// Símbolos y colores del marco de la CLI: cada vista abre con ┌ y cierra con └
 const LOG_SYMBOLS: Record<LogKind, { symbol: string; color: string }> = {
   step: { symbol: "◇", color: "green" },
   info: { symbol: "●", color: "blue" },
@@ -44,6 +44,19 @@ export function Outro({ children }: { children: string }) {
         <Text color="gray">└</Text>
         {"  "}
         <Text dimColor>{children}</Text>
+      </Text>
+    </Box>
+  );
+}
+
+export function Answer({ question, answer }: { question: string; answer: string }) {
+  return (
+    <Box flexDirection="column">
+      <Log kind="step">{question}</Log>
+      <Text>
+        <Text color="gray">│</Text>
+        {"  "}
+        <Text dimColor>{answer}</Text>
       </Text>
     </Box>
   );

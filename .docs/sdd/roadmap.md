@@ -7,7 +7,7 @@
 | 0001 | Tooling con moon, limpieza del repo y documentación al día | ✅ |
 | 0005 | Base ink + `um check`: ink 8, entry de render, `bun build --compile` con `react-devtools-core`, Spinner propio · `proposal: 0004` |✅ |
 | 0006 | `um update` en ink: MultiSelect agrupado, Confirm de force/gsudo y progreso por paquete, tras 0005 · `proposal: 0004` | ✅ |
-| 0007 | Menú interactivo, `providers` e `ignore` en ink; fuera `@clack/prompts`, tras 0006 · `proposal: 0004` | ⏳ |
+| 0007 | Menú interactivo, `providers` e `ignore` en ink; fuera `@clack/prompts`, tras 0006 · `proposal: 0004` | ✅ |
 | 0003 | Progress bars durante las actualizaciones (de B3) | ⏸️ aparcada: absorbida por la propuesta 0004 (feature 0006), 2026-10-08 |
 
 ## Backlog
@@ -43,6 +43,7 @@
 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** `bun run sonar` pasa `%SONAR_TOKEN%` con sintaxis de cmd. Sin verificar si `bun run` lo expande en Windows | bajo | **Esperar 2.º ticket** |
 | `src/ui/CheckApp.tsx` (feature 0005): `pc.createColors` ignora `NO_COLOR`/`FORCE_COLOR` en el aviso de stderr; `Summary` sale vacío si todas las updates son `error` (develop omitía la línea); `key={update.id}` duplicable; sin test del rechazo de `load`; un rechazo que no sea `Error` cuenta como resultado | bajo: casos que hoy no se dan con los parsers actuales | **Esperar 2.º ticket** |
 | `src/ui/` (feature 0006): colores del prompt no calcados de clack (`◼` verde, `│`/`└` cian con el prompt activo, `/` atenuado); dos componentes `Rail` con el mismo nombre (`UpdateApp.tsx`, `UpdateProgress.tsx`); pausas fijas de 250 ms en `UpdateApp.test.tsx` (~35 s la suite UI sola) | bajo: cosmético y lentitud de tests | **Esperar 2.º ticket** |
+| `src/ui/` (feature 0007): `lists only registered providers` (`menu.test.tsx`) prueba el mapeo 1:1, no el filtrado del registro (renombrar a `maps one option per row in order`); `PromptApp` con ~21 líneas; su efecto depende de `onDone` (una flecha nueva por render) y un re-render tras responder repite `onDone` y `exit()` | bajo: nombre engañoso y repetición sin efecto visible | **Esperar 2.º ticket** |
 | TypeScript sigue en 6.0.3: `typescript-eslint` 8.71.1 exige `typescript <6.1.0` y bloquea pasar a TS 7 | bajo: sin impacto en `um`; se pierde el compilador nativo de TS 7 | **Esperar 2.º ticket**: a que `typescript-eslint` admita TS 7 |
 
 ## Patches
