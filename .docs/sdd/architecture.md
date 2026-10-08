@@ -62,7 +62,7 @@ Comandos reales de cada provider (los que verifica el código):
 ## Dónde va lo nuevo
 
 - Gestor nuevo → `src/providers/<gestor>.ts` que extienda `BaseProvider`, su parser en `parsers.ts` con test en `parsers.test.ts`, registro en `providers/index.ts` y entrada en `DEFAULT_PROVIDERS` (`types.ts`).
-- Comando nuevo de la CLI → `main()` y su función `xxxCommand` en `src/index.ts`, más `printHelp`. Si tiene versión interactiva, opción en `interactiveMode`. Lo que dibuja con ink va en `src/ui/` y se monta con `renderApp`; `index.ts` le pasa la lógica como funciones, sin JSX.
+- Comando nuevo de la CLI → `main()` y su función `xxxCommand` en `src/index.ts`, más `printHelp`. Si tiene versión interactiva, opción en `MENU_OPTIONS` y `MenuAction` (`src/ui/menu.tsx`) y su rama en `runMenuAction` (`src/index.ts`). Lo que dibuja con ink va en `src/ui/` y se monta con `renderApp`; `index.ts` le pasa la lógica como funciones, sin JSX.
 - Dato persistente nuevo → campo opcional en `ConfigSchema` (`types.ts`) con getters y setters en `config.ts`.
 - Ejecutar un comando externo → siempre con `runCommand` / `runPowerShell` de `runner.ts`, nunca `Bun.spawn` directo.
 
