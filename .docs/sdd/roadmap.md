@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | 0001 | Tooling con moon, limpieza del repo y documentación al día | ✅ |
 | 0005 | Base ink + `um check`: ink 8, entry de render, `bun build --compile` con `react-devtools-core`, Spinner propio · `proposal: 0004` |✅ |
-| 0006 | `um update` en ink: MultiSelect agrupado, Confirm de force/gsudo y progreso por paquete, tras 0005 · `proposal: 0004` | ⏳ |
+| 0006 | `um update` en ink: MultiSelect agrupado, Confirm de force/gsudo y progreso por paquete, tras 0005 · `proposal: 0004` | ✅ |
 | 0007 | Menú interactivo, `providers` e `ignore` en ink; fuera `@clack/prompts`, tras 0006 · `proposal: 0004` | ⏳ |
 | 0003 | Progress bars durante las actualizaciones (de B3) | ⏸️ aparcada: absorbida por la propuesta 0004 (feature 0006), 2026-10-08 |
 
@@ -42,6 +42,7 @@
 | Provider de proto: parsea la tabla de texto (corta `3.14.8+20261003` a `3.14.8+202`; con un agente en el entorno proto 0.62 escribe NDJSON, de ahí los 2 tests en rojo de `parseProtoOutput`) y actualiza con `proto install <tool>`, que no instala un `newest_version` con sufijo de build (python exige `proto install python 3 --pin`) | medio: proto lista updates que `um` no sabe aplicar | **Actuar**: feature (pasar a `proto outdated --json` y decidir la semántica de instalación y `--pin`) |
 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** `bun run sonar` pasa `%SONAR_TOKEN%` con sintaxis de cmd. Sin verificar si `bun run` lo expande en Windows | bajo | **Esperar 2.º ticket** |
 | `src/ui/CheckApp.tsx` (feature 0005): `pc.createColors` ignora `NO_COLOR`/`FORCE_COLOR` en el aviso de stderr; `Summary` sale vacío si todas las updates son `error` (develop omitía la línea); `key={update.id}` duplicable; sin test del rechazo de `load`; un rechazo que no sea `Error` cuenta como resultado | bajo: casos que hoy no se dan con los parsers actuales | **Esperar 2.º ticket** |
+| `src/ui/` (feature 0006): colores del prompt no calcados de clack (`◼` verde, `│`/`└` cian con el prompt activo, `/` atenuado); dos componentes `Rail` con el mismo nombre (`UpdateApp.tsx`, `UpdateProgress.tsx`); pausas fijas de 250 ms en `UpdateApp.test.tsx` (~35 s la suite UI sola) | bajo: cosmético y lentitud de tests | **Esperar 2.º ticket** |
 | TypeScript sigue en 6.0.3: `typescript-eslint` 8.71.1 exige `typescript <6.1.0` y bloquea pasar a TS 7 | bajo: sin impacto en `um`; se pierde el compilador nativo de TS 7 | **Esperar 2.º ticket**: a que `typescript-eslint` admita TS 7 |
 
 ## Patches

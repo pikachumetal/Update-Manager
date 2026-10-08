@@ -74,4 +74,5 @@ Comandos reales de cada provider (los que verifica el código):
 - (anterior a SDD) — Bun como runtime — TypeScript nativo, gestor de paquetes integrado y `Bun.spawn` para lanzar comandos — `PLANNING.md` original.
 - (anterior a SDD) — @clack/prompts para la UI — consistencia con project-manager y spinners integrados — `PLANNING.md` original.
 - 2026-10-08 — ink se monta con `patchConsole: false` — con el `console` parcheado, lo que escribe la consola mientras ink está montado (el `Cancelled` de Ctrl+C, el error de `main`) sale encima del marco o se pierde al desmontar — `src/ui/render.tsx`, feature 0005.
+- 2026-10-08 — Una vista de ink que termina sola sale desde un efecto tras el commit del último estado, y con stdout TTY dibuja en `<Static>` lo ya hecho — un `exit()` justo tras un `setState` desmonta antes de dibujarlo; sin `<Static>`, un frame más alto que la terminal se repinta entero en cada tick en Windows, y sin TTY `<Static>` duplica los últimos bloques — `src/ui/UpdateApp.tsx`, feature 0006.
 - 2026-10-06 — moon orquesta y `package.json` define — moon llama a los scripts con `bun run`, así que `bun run <script>` sigue funcionando — feature 0001.

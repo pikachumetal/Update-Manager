@@ -34,7 +34,7 @@ Cada tarea de moon ejecuta su script de `package.json` con `bun run`:
 
 ## Testing
 
-TDD con `bun test` para la lógica pura y la vista de ink (`src/ui/*.test.tsx`, con `renderToString` de ink, sin `ink-testing-library`): los parsers de salida de cada gestor viven en `src/providers/parsers.ts` y se prueban en `src/providers/parsers.test.ts`. La parte que lanza procesos (`runCommand`, `updatePackage`, el flujo de `index.ts`) no tiene tests. Se verifica con smoke manual: `um check` y, si el cambio toca actualizaciones, `um update <provider>` en la máquina real. No hay CI.
+TDD con `bun test` para la lógica pura y la vista de ink (`src/ui/*.test.tsx`, con `renderToString` de ink, sin `ink-testing-library`; los prompts se prueban con el stdin falso de `src/ui/testStdin.ts`, y entre teclas que montan otro prompt hay que esperar ~250 ms, porque ink tarda en suscribir el `useInput` de un componente montado de forma asíncrona y la tecla anterior se pierde): los parsers de salida de cada gestor viven en `src/providers/parsers.ts` y se prueban en `src/providers/parsers.test.ts`. La parte que lanza procesos (`runCommand`, `updatePackage`, el flujo de `index.ts`) no tiene tests. Se verifica con smoke manual: `um check` y, si el cambio toca actualizaciones, `um update <provider>` en la máquina real. No hay CI.
 
 ## Decisiones abiertas
 

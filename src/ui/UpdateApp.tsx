@@ -1,5 +1,5 @@
-import { type ReactNode, useEffect, useState } from "react";
-import { Box, Text, useApp, useInput, useStdin } from "ink";
+import { type Dispatch, type ReactNode, type SetStateAction, useEffect, useState } from "react";
+import { Box, Static, Text, useApp, useInput, useStdin, useStdout } from "ink";
 import type { CheckResult, PackageUpdate } from "../types";
 import { UpdatesFound, useFailureWarnings } from "./CheckApp";
 import { Confirm } from "./Confirm";
@@ -155,14 +155,7 @@ async function runUpdates(
   plan: ForcePlan,
   ui: FlowUi
 ): Promise<UpdateTally> {
-  const ordered = [
-    ...Map.groupBy([...plan.available, ...plan.forced], (u) => u.provider).values(),
-  ].flat();
-  let rows: ProgressRow[] = ordered.map((update) => ({
-    update,
-    force: plan.forced.includes(update),
-    state: "queued",
-  }));
+  let rows = queuedRows(plan);
   const setRow = (index: number, patch: Partial<ProgressRow>) => {
     rows = rows.map((row, i) => (i === index ? { ...row, ...patch } : row));
     ui.show(<UpdateProgress rows={rows} />);
@@ -176,9 +169,23 @@ async function runUpdates(
   }
   ui.show(null);
   ui.push(<UpdateProgress rows={rows} />);
+  return tally(rows, plan.skipped);
+}
 
+function queuedRows(plan: ForcePlan): ProgressRow[] {
+  const ordered = [
+    ...Map.groupBy([...plan.available, ...plan.forced], (u) => u.provider).values(),
+  ].flat();
+  return ordered.map((update) => ({
+    update,
+    force: plan.forced.includes(update),
+    state: "queued",
+  }));
+}
+
+function tally(rows: ProgressRow[], skipped: number): UpdateTally {
   const count = (state: ProgressRow["state"]) => rows.filter((r) => r.state === state).length;
-  return { updated: count("done"), failed: count("failed"), skipped: plan.skipped };
+  return { updated: count("done"), failed: count("failed"), skipped };
 }
 
 async function updateOne(
@@ -221,6 +228,26 @@ export async function runUpdateFlow(options: UpdateViewOptions, ui: FlowUi): Pro
   ui.push(<Outro>Done</Outro>);
 }
 
+function createFlowUi(
+  setBlocks: Dispatch<SetStateAction<ReactNode[]>>,
+  setActive: Dispatch<SetStateAction<ReactNode>>,
+  warn: FlowUi["warn"]
+): FlowUi {
+  return {
+    push: (node) => setBlocks((current) => [...current, node]),
+    show: (node) => setActive(() => node),
+    ask: (prompt) =>
+      new Promise((resolve) => {
+        const done = (value: Parameters<typeof resolve>[0]) => {
+          setActive(null);
+          resolve(value);
+        };
+        setActive(() => prompt(done));
+      }),
+    warn,
+  };
+}
+
 function useFlow(options: UpdateViewOptions) {
   const { exit } = useApp();
   const warnFailures = useFailureWarnings();
@@ -234,19 +261,7 @@ function useFlow(options: UpdateViewOptions) {
   }, [ending, exit]);
 
   useEffect(() => {
-    const ui: FlowUi = {
-      push: (node) => setBlocks((current) => [...current, node]),
-      show: (node) => setActive(() => node),
-      ask: (prompt) =>
-        new Promise((resolve) => {
-          const done = (value: Parameters<typeof resolve>[0]) => {
-            setActive(null);
-            resolve(value);
-          };
-          setActive(() => prompt(done));
-        }),
-      warn: (result) => warnFailures(result.failures),
-    };
+    const ui = createFlowUi(setBlocks, setActive, (result) => warnFailures(result.failures));
     runUpdateFlow(options, ui).then(
       () => setEnding({}),
       (error: unknown) => setEnding({ error })
@@ -260,6 +275,7 @@ function useFlow(options: UpdateViewOptions) {
 export function UpdateApp({ onCancel, ...options }: UpdateViewOptions & { onCancel: () => void }) {
   const { exit } = useApp();
   const { isRawModeSupported } = useStdin();
+  const { stdout } = useStdout();
   const { blocks, active } = useFlow(options);
 
   // Con el teclado en raw mode, Ctrl+C no llega como SIGINT
@@ -273,16 +289,19 @@ export function UpdateApp({ onCancel, ...options }: UpdateViewOptions & { onCanc
     { isActive: isRawModeSupported }
   );
 
-  return (
-    <Box flexDirection="column">
-      <Intro title={TITLE} />
-      {blocks.map((block, index) => (
-        <Box key={index} flexDirection="column">
-          {block}
-        </Box>
-      ))}
-      {active}
+  const items = [<Intro key="intro" title={TITLE} />, ...blocks];
+  const done = (block: ReactNode, index: number) => (
+    <Box key={index} flexDirection="column">
+      {block}
     </Box>
+  );
+  // Con TTY, lo ya hecho va en Static: si el frame dinámico pasa de la altura de la terminal, ink
+  // lo repinta entero en cada tick. Sin TTY no hay repintado, y Static duplicaría los últimos bloques
+  return (
+    <>
+      {"isTTY" in stdout && stdout.isTTY ? <Static items={items}>{done}</Static> : items.map(done)}
+      {active}
+    </>
   );
 }
 

@@ -15,13 +15,8 @@ const groupByProvider = (updates: PackageUpdate[]) =>
 // Un mismo id puede venir de dos providers (typescript en npm y en bun)
 const rowKey = (update: PackageUpdate) => `${update.provider}:${update.id}`;
 
-function useSelection(updates: PackageUpdate[], onSubmit: MultiSelectProps["onSubmit"]) {
-  // El cursor recorre las filas en el orden en que se ven, agrupadas por provider
-  const rows = [...groupByProvider(updates).values()].flat();
-  const { isRawModeSupported } = useStdin();
-  const [cursor, setCursor] = useState(0);
+function useChecked(updates: PackageUpdate[]) {
   const [checked, setChecked] = useState(() => new Set(updates.map(rowKey)));
-
   const toggle = (key: string) =>
     setChecked((current) => {
       const next = new Set(current);
@@ -32,6 +27,15 @@ function useSelection(updates: PackageUpdate[], onSubmit: MultiSelectProps["onSu
     setChecked((current) =>
       current.size === updates.length ? new Set() : new Set(updates.map(rowKey))
     );
+  return { checked, toggle, toggleAll };
+}
+
+function useSelection(updates: PackageUpdate[], onSubmit: MultiSelectProps["onSubmit"]) {
+  // El cursor recorre las filas en el orden en que se ven, agrupadas por provider
+  const rows = [...groupByProvider(updates).values()].flat();
+  const { isRawModeSupported } = useStdin();
+  const [cursor, setCursor] = useState(0);
+  const { checked, toggle, toggleAll } = useChecked(updates);
   const move = (step: number) =>
     setCursor((current) => (current + step + rows.length) % rows.length);
 

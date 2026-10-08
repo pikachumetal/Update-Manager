@@ -16,7 +16,7 @@ import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
 import type { CheckFailure, CheckResult, PackageUpdate, UpdateProvider } from "./types";
 import { printCheckError, runCheckView } from "./ui/CheckApp";
-import { runUpdateView } from "./ui/UpdateApp";
+import { runUpdateView, type UpdateViewOptions } from "./ui/UpdateApp";
 
 const VERSION = "0.1.0";
 
@@ -374,7 +374,16 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
     return;
   }
 
-  const outcome = await runUpdateView({
+  const outcome = await runUpdateView(updateViewOptions(provider, interactive, skipConfirm));
+  if (outcome === "cancelled") cancel();
+}
+
+function updateViewOptions(
+  provider: UpdateProvider | undefined,
+  interactive: boolean,
+  skipConfirm: boolean
+): UpdateViewOptions {
+  return {
     spinnerLabel: provider ? `Checking ${provider.name}...` : "Checking for updates...",
     load: provider
       ? async () => ({
@@ -388,8 +397,7 @@ async function updateCommand(providerId?: string, skipConfirm = false) {
     hasGsudo: () => commandExists("gsudo"),
     installGsudo,
     updatePackage: updateOnePackage,
-  });
-  if (outcome === "cancelled") cancel();
+  };
 }
 
 async function installGsudo(): Promise<boolean> {
@@ -402,7 +410,7 @@ async function installGsudo(): Promise<boolean> {
 
 async function updateOnePackage(update: PackageUpdate, force: boolean): Promise<boolean> {
   const success = await providers[update.provider].updatePackage(update.id, { force });
-  // Save installed version to handle packages with version mismatch issues
+  // Se guarda la versión para no volver a ofrecer paquetes cuya versión el gestor reporta mal
   if (success) await setInstalledVersion(update.id, update.newVersion);
   return success;
 }

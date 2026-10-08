@@ -1,7 +1,9 @@
 import { describe, expect, test } from "bun:test";
+import { Writable } from "node:stream";
+import { render } from "ink";
 import type { PackageUpdate } from "../types";
 import { UpdateApp, type UpdateViewOptions } from "./UpdateApp";
-import { mountWithKeys, tick } from "./testStdin";
+import { createTestStdin, mountWithKeys, tick } from "./testStdin";
 
 const pkg = (
   name: string,
@@ -278,6 +280,57 @@ describe("UpdateApp", () => {
     expect(indexOf(last(), "◆  Select")).toBe(-1);
     expect(calls).toEqual([{ id: "Git.Git", force: false }]);
     app.unmount();
+  });
+
+  test("writes finished blocks once while the spinner repaints", async () => {
+    let release = () => {};
+    const { options, spies } = setup([git], {
+      interactive: false,
+      skipSelection: true,
+      updatePackage: () => new Promise((resolve) => (release = () => resolve(true))),
+    });
+    let written = "";
+    const stdout = new Writable({
+      write: (chunk, _encoding, callback) => {
+        written += chunk.toString();
+        callback();
+      },
+    });
+    Object.assign(stdout, { columns: 80, rows: 10, isTTY: true });
+    const app = render(<UpdateApp {...options} onCancel={() => spies.cancel++} />, {
+      stdout: stdout as unknown as NodeJS.WriteStream,
+      stdin: createTestStdin(),
+      patchConsole: false,
+      interactive: true,
+      exitOnCtrlC: false,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    release();
+    await app.waitUntilExit();
+    expect(written.split("Updating packages").length - 1).toBe(1);
+    expect(written.split("Summary: 1 available").length - 1).toBe(1);
+  });
+
+  test("writes each block once without a terminal", async () => {
+    const { options, spies } = setup([git], { interactive: false, skipSelection: true });
+    let written = "";
+    const stdout = new Writable({
+      write: (chunk, _encoding, callback) => {
+        written += chunk.toString();
+        callback();
+      },
+    });
+    const app = render(<UpdateApp {...options} onCancel={() => spies.cancel++} />, {
+      stdout: stdout as unknown as NodeJS.WriteStream,
+      stdin: createTestStdin(),
+      patchConsole: false,
+      interactive: false,
+      exitOnCtrlC: false,
+    });
+    await app.waitUntilExit();
+    expect(written.split("Updating packages").length - 1).toBe(1);
+    expect(written.split("✓ Git.Git 2.50.0 → 2.51.0").length - 1).toBe(1);
+    expect(written.split("Done").length - 1).toBe(1);
   });
 
   test("cancels on Ctrl+C", async () => {
