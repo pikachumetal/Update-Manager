@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import type { PackageUpdate } from "../types";
-import { MultiSelect } from "./MultiSelect";
+import { type CheckOption, CheckList, MultiSelect } from "./MultiSelect";
 import { mountWithKeys } from "./testStdin";
 
 const pkg = (
@@ -103,6 +103,73 @@ describe("MultiSelect", () => {
       select([pkg("Foo.Pinned", "winget", "1.0", "2.0", "pinned")]).node
     );
     expect(last().find((l) => l.includes("Foo.Pinned"))).toEndWith("📌 pinned");
+    app.unmount();
+  });
+});
+
+const TOGGLE_OPTIONS: CheckOption<string>[] = [
+  { value: "winget", label: "WinGet", checked: true },
+  { value: "proto", label: "Proto", checked: true },
+  { value: "chocolatey", label: "Chocolatey", hint: "not available", checked: false },
+];
+
+const checkList = (required = false) => {
+  const submitted: string[][] = [];
+  const node = (
+    <CheckList
+      message="Toggle"
+      options={TOGGLE_OPTIONS}
+      required={required}
+      onSubmit={(selected) => submitted.push(selected)}
+    />
+  );
+  return { node, submitted };
+};
+
+describe("CheckList", () => {
+  test("draws a flat list with the initial checks", async () => {
+    const { app, last } = await mountWithKeys(checkList().node);
+    expect(last()).toEqual(["│", "◆  Toggle", "│  ◼ WinGet", "│  ◼ Proto", "│  ◻ Chocolatey", "└"]);
+    app.unmount();
+  });
+
+  test("shows the hint on the active row", async () => {
+    const { app, press, last } = await mountWithKeys(checkList().node);
+    await press(DOWN, DOWN);
+    expect(last()).toContain("│  ◻ Chocolatey (not available)");
+    expect(last()).toContain("│  ◼ WinGet");
+    app.unmount();
+  });
+
+  test("submits the checked values in list order", async () => {
+    const { node, submitted } = checkList();
+    const { app, press } = await mountWithKeys(node);
+    await press(DOWN, " ", DOWN, " ", "\r");
+    expect(submitted).toEqual([["winget", "chocolatey"]]);
+    app.unmount();
+  });
+
+  test("toggles all with a", async () => {
+    const { app, press, last } = await mountWithKeys(checkList().node);
+    const marks = () =>
+      last()
+        .filter((l) => l.startsWith("│  "))
+        .map((l) => l.charAt(3));
+    await press("a");
+    expect(marks()).toEqual(["◼", "◼", "◼"]);
+    await press("a");
+    expect(marks()).toEqual(["◻", "◻", "◻"]);
+    app.unmount();
+  });
+
+  test("refuses an empty submit when required", async () => {
+    const { node, submitted } = checkList(true);
+    const { app, press, last } = await mountWithKeys(node);
+    await press(" ", DOWN, " ", "\r");
+    expect(submitted).toEqual([]);
+    expect(last().at(-1)).toBe("└  Please select at least one option.");
+    await press(" ");
+    expect(last().at(-1)).toBe("└");
     app.unmount();
   });
 });

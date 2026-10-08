@@ -3,7 +3,7 @@ import { Box, Static, Text, useApp, useInput, useStdin, useStdout } from "ink";
 import type { CheckResult, PackageUpdate } from "../types";
 import { UpdatesFound, useFailureWarnings } from "./CheckApp";
 import { Confirm } from "./Confirm";
-import { Intro, Log, Outro } from "./frame";
+import { Answer, Intro, Log, Outro } from "./frame";
 import { MultiSelect } from "./MultiSelect";
 import { renderApp } from "./render";
 import { Spinner } from "./Spinner";
@@ -39,19 +39,6 @@ const SELECT_MESSAGE = "Select packages to update";
 const GSUDO_MESSAGE = "gsudo not found. Install it for admin elevation?";
 
 const Rail = () => <Text color="gray">│</Text>;
-
-function Answer({ question, answer }: { question: string; answer: string }) {
-  return (
-    <Box flexDirection="column">
-      <Log kind="step">{question}</Log>
-      <Text>
-        <Text color="gray">│</Text>
-        {"  "}
-        <Text dimColor>{answer}</Text>
-      </Text>
-    </Box>
-  );
-}
 
 function Working({ label }: { label: string }) {
   return (
