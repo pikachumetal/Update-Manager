@@ -8,6 +8,7 @@
 | 0005 | Base ink + `um check`: ink 8, entry de render, `bun build --compile` con `react-devtools-core`, Spinner propio · `proposal: 0004` |✅ |
 | 0006 | `um update` en ink: MultiSelect agrupado, Confirm de force/gsudo y progreso por paquete, tras 0005 · `proposal: 0004` | ✅ |
 | 0007 | Menú interactivo, `providers` e `ignore` en ink; fuera `@clack/prompts`, tras 0006 · `proposal: 0004` | ✅ |
+| 0009 | Resto de la CLI en ink con el marco de `src/ui/menu.tsx`: `providers` (y `enable`/`disable`), `ignore`, `unignore`, `ignored`, `--version`, `--help`, los avisos `Interactive terminal required…` y el `Cancelled` de Ctrl+C; sin TTY siguen funcionando, tras 0007 | ⏳ |
 | 0003 | Progress bars durante las actualizaciones (de B3) | ⏸️ aparcada: absorbida por la propuesta 0004 (feature 0006), 2026-10-08 |
 
 ## Backlog
