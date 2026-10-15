@@ -20,6 +20,7 @@ const pinned = pkg("Foo.Pinned", "winget", "1.0", "2.0", "pinned");
 const leftPad = pkg("left-pad", "npm", "1.0.0", "1.1.0", "unknown");
 
 const ENTER = "\r";
+const SPACE = " ";
 const RIGHT = "\u001B[C";
 
 function setup(updates: PackageUpdate[], overrides: Partial<UpdateViewOptions> = {}) {
@@ -200,7 +201,7 @@ describe("UpdateApp", () => {
       },
     });
     const { app, press, last } = await start(options, spies);
-    await press(ENTER);
+    await press(SPACE, ENTER);
     for (const line of [
       "▲  Found 2 package(s) that require force:",
       "   • Foo.Pinned (pinned)",
@@ -222,7 +223,7 @@ describe("UpdateApp", () => {
   test("skips both when force is declined", async () => {
     const { options, spies, calls } = setup([pinned, leftPad]);
     const { app, press, last } = await start(options, spies);
-    await press(ENTER, RIGHT, ENTER);
+    await press(SPACE, ENTER, RIGHT, ENTER);
     expect(calls).toEqual([]);
     expect(last()).toContain("●  No packages to update");
     expect(last().at(-1)).toBe("└  Done");
@@ -243,7 +244,7 @@ describe("UpdateApp", () => {
   test("offers gsudo before forcing", async () => {
     const yes = setup([pinned], { hasGsudo: async () => false });
     const first = await start(yes.options, yes.spies);
-    await first.press(ENTER);
+    await first.press(SPACE, ENTER);
     expect(first.last()).toContain("◆  gsudo not found. Install it for admin elevation?");
     await first.press(ENTER);
     expect(yes.spies.installGsudo).toBe(1);
@@ -253,7 +254,7 @@ describe("UpdateApp", () => {
 
     const no = setup([pinned], { hasGsudo: async () => false });
     const second = await start(no.options, no.spies);
-    await second.press(ENTER, RIGHT, ENTER);
+    await second.press(SPACE, ENTER, RIGHT, ENTER);
     expect(no.spies.installGsudo).toBe(0);
     expect(second.last()).toContain("◆  Force update 1 WinGet package(s)?");
     second.app.unmount();

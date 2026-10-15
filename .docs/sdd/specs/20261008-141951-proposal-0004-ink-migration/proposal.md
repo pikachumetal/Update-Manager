@@ -40,4 +40,6 @@ No aplica: entrevista.
 
 ## Enmiendas
 
-_Ninguna._
+- **2026-10-15, patch 0008, pedido por el dev-lead** — «Selección agrupada por provider, con todo marcado al empezar».
+  - Antes: todo marcado. Ejemplo: 1 `pinned` de winget y 1 `available` de npm salen los 2 marcados.
+  - Ahora: todo marcado salvo los de WinGet `pinned` o `unknown`, que empiezan desmarcados. Ejemplo: `Git.Git` `available` y `Foo.Pinned` `pinned` de winget, y `left-pad` `unknown` de npm → `Git.Git` y `left-pad` marcados, `Foo.Pinned` desmarcado; Enter sin tocar nada no fuerza nada.
