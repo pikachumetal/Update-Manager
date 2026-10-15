@@ -98,6 +98,27 @@ describe("MultiSelect", () => {
     app.unmount();
   });
 
+  test("leaves WinGet packages that need force unchecked", async () => {
+    const winPinned = pkg("Foo.Pinned", "winget", "1.0", "2.0", "pinned");
+    const winUnknown = pkg("Foo.Unknown", "winget", "Unknown", "2.0", "unknown");
+    const npmUnknown = pkg("left-pad", "npm", "1.0.0", "1.1.0", "unknown");
+    const { node, submitted } = select([git, winPinned, winUnknown, npmUnknown]);
+    const { app, press, last } = await mountWithKeys(node);
+    const mark = (name: string) =>
+      last()
+        .find((l) => l.includes(` ${name} `))
+        ?.charAt(5);
+    expect([git, winPinned, winUnknown, npmUnknown].map((u) => mark(u.name))).toEqual([
+      "◼",
+      "◻",
+      "◻",
+      "◼",
+    ]);
+    await press("\r");
+    expect(submitted).toEqual([[git, npmUnknown]]);
+    app.unmount();
+  });
+
   test("shows status badges", async () => {
     const { app, last } = await mountWithKeys(
       select([pkg("Foo.Pinned", "winget", "1.0", "2.0", "pinned")]).node

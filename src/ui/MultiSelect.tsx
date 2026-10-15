@@ -58,10 +58,15 @@ function useCheckList(
   return { cursor, checked, error };
 }
 
+// WinGet solo los actualiza con force: el usuario los marca a propósito
+const needsForce = (update: PackageUpdate) =>
+  update.provider === "winget" && (update.status === "pinned" || update.status === "unknown");
+
 function useSelection(updates: PackageUpdate[], onSubmit: MultiSelectProps["onSubmit"]) {
   const rows = [...groupByProvider(updates).values()].flat();
   const keys = rows.map(rowKey);
-  const { cursor, checked } = useCheckList(keys, keys, (selected) =>
+  const initial = rows.filter((u) => !needsForce(u)).map(rowKey);
+  const { cursor, checked } = useCheckList(keys, initial, (selected) =>
     onSubmit(updates.filter((u) => selected.has(rowKey(u))))
   );
   return { rows, cursor, checked };
