@@ -34,6 +34,10 @@ Qué muestra y qué hace `um update` y `um update <provider>`: la consulta, la s
 - WHEN el usuario pulsa `a` y Enter
 - THEN las 3 filas pasan a `◻`, se ve `●  Update cancelled` y `└  Cancelled`, no se actualiza nada y sale con 0
 - AND con alguna fila desmarcada, `a` marca las 3
+- GIVEN `Git.Git` `available`, `Foo.Pinned` `pinned` y `Foo.Unknown` `unknown` de WinGet, y `left-pad` `unknown` de npm, en una terminal interactiva
+- WHEN `um update`
+- THEN `Foo.Pinned` y `Foo.Unknown` empiezan en `◻`, y `Git.Git` y `left-pad` en `◼`
+- AND Enter sin tocar nada actualiza `Git.Git` y salta `left-pad`; para forzar `Foo.Pinned`, el usuario la marca con espacio
 
 ### Force solo para WinGet, con confirmación
 

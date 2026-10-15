@@ -50,5 +50,6 @@
 
 | Fecha | Id | Descripción |
 | --- | --- | --- |
+| 2026-10-15 | 0008 | 🧪 validación diferida a próximo `um update` con un pinned de WinGet, a cargo del dev-lead — WinGet `pinned` y `unknown` salen desmarcados en la selección de `um update` · [patch](specs/20261015-074853-patch-0008-winget-force-unchecked/patch.md) |
 
 ## Releases cerradas

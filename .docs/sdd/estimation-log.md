@@ -7,15 +7,28 @@
 | 2026-10-08 | 0005 | infra/tooling | 3 | 0.55 | 0.18 | 23017k | 1618k | no aplica | sin precio | 20261008-150312-feature-0005-ink-base-check |
 | 2026-10-08 | 0007 | frontend | 1 | 1.25 | 1.25 | 18726k | 2018k | — | sin precio | 20261008-165945-feature-0007-ink-menu-providers-ignore |
 | 2026-10-08 | 0006 | frontend | 3 | 0.7 | 0.23 | 37779k | 2772k | — | sin precio | 20261008-175953-feature-0006-ink-update |
+| 2026-10-15 | 0008 | patch | 0.25 | 0.3 | 1.2 | — | — | — | — | 20261015-074853-patch-0008-winget-force-unchecked |
 
-**Factor de calibración** (ratio mediano real/estimado, 4 artefactos): **0.21** · media 0.46
+**Factor de calibración** (ratio mediano real/estimado, 5 artefactos): **0.23** · media 0.61
 
-- n insuficiente (hacen falta 5)
+- p25–p75: 0.18–1.2
+- p80: 1.21 — para comprometer una fecha, multiplica la estimación por el p80: así cubre 4 de cada 5 artefactos.
+- Dentro de ±25 %: 40 % · sobreestimadas: 60 % · infraestimadas: 0 %
+- Error absoluto (h): media 1.67 · mediana 2.3
 - Tendencia: n insuficiente (hacen falta 20)
+
+| Tramo del ratio | n | % |
+| --- | --- | --- |
+| <0.5 | 3 | 60 % |
+| 0.5–0.8 | 0 | 0 % |
+| 0.8–1.25 | 1 | 20 % |
+| 1.25–2 | 1 | 20 % |
+| ≥2 | 0 | 0 % |
 
 | Tipo | n | Mediana | p25–p75 |
 | --- | --- | --- | --- |
 | frontend | 2 | 0.74 | — |
 | infra/tooling | 2 | 0.18 | — |
+| patch | 1 | 1.2 | — |
 
 > Con menos de 10 tareas con ratio la calibración es orientativa. Ver `estimation.md`.

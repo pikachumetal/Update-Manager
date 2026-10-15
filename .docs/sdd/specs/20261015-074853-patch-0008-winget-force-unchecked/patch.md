@@ -7,7 +7,7 @@ solution: dev-lead
 status: done
 created: 2026-10-15
 branch: patch/0008-winget-force-unchecked
-commit: <hash>
+commit: 6820836
 ---
 
 # Patch 0008 — WinGet pinned y unknown salen desmarcados en la selección
@@ -46,7 +46,9 @@ commit: <hash>
 | 3 | `moon run :lint :typecheck --force` | ✅ |
 | 4 | `bun test` | ✅ 85/87; los 2 rojos son `parseProtoOutput`, deuda conocida |
 | 5 | `moon run :build` (`bin/um.exe`) | ✅ |
-| 6 | Smoke `um update winget` con un paquete pinned en una terminal | pendiente del dev-lead (el agente no tiene TTY) |
+| 6 | Smoke `um update winget` con un paquete pinned en una terminal | diferido (el agente no tiene TTY) |
+
+Validación diferida: 2026-10-15 · «Diferir: lo pruebo en el próximo `um update` con un pinned de WinGet, a cargo del dev-lead» · disparador: próximo `um update` con un pinned de WinGet, a cargo del dev-lead
 
 ## 5. Tiempo (ligero)
 
