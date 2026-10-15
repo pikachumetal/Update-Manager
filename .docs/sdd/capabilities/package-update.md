@@ -91,16 +91,16 @@ Qué muestra y qué hace `um update` y `um update <provider>`: la consulta, la s
 - THEN no se pide ningún Confirm ni se instala gsudo, y `Foo.Pinned` cuenta como `⊘ 1 skipped`
 - GIVEN cualquier estado de los providers
 - WHEN `um update winget < nul`
-- THEN stderr recibe `Interactive terminal required (use --yes)`, no se consulta ningún provider y sale con código 1
+- THEN stderr recibe una sola línea, `■  Interactive terminal required (use --yes)`, sin `┌`, `│` ni `└`; no se consulta ningún provider y sale con código 1
 
 ### Ctrl+C cancela
 
 - GIVEN `um update bun` en la selección, en una terminal interactiva
 - WHEN el usuario pulsa Ctrl+C
-- THEN se ve `Cancelled`, no se actualiza nada y sale con código 0
+- THEN se ve `│` y `└  Cancelled`, no se actualiza nada y sale con código 0
 - GIVEN `um update` consultando, en un Confirm o con un paquete `updating`
 - WHEN el usuario pulsa Ctrl+C
-- THEN se ve `Cancelled`, no se ve `●  Result:` ni `└  Done`, y sale con código 0
+- THEN se ve `│` y `└  Cancelled`, no se ve `●  Result:` ni `└  Done`, y sale con código 0
 
 ## Reglas de la capacidad
 

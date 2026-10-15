@@ -24,24 +24,26 @@
 
 - GIVEN WinGet instalado y activo, npm instalado y desactivado, y Chocolatey sin instalar
 - WHEN `um providers > out.txt`
-- THEN `out.txt` contiene una vacía, `Providers:`, una vacía y una fila por provider registrado, como `  📦 WinGet               enabled`, `  📦 npm (global)         disabled` y `  🍫 Chocolatey           not installed` (nombre relleno a 20), y una vacía; sin escapes de color ni de cursor, y sale con 0
+- THEN `out.txt` contiene `┌   Providers `, `│`, una fila por provider registrado en el orden del registro, como `│  📦 WinGet               enabled`, `│  📦 npm (global)         disabled` y `│  🍫 Chocolatey           not installed` (nombre relleno a 20), y `└`; sin escapes de color ni de cursor, y sale con 0
+- AND en una terminal, `um providers` dibuja las mismas líneas, con `enabled` en verde y `disabled`/`not installed` atenuados
 
 ### Activar y desactivar un provider por comando
 
 - GIVEN Chocolatey desactivado
 - WHEN `um providers enable chocolatey`
-- THEN se imprime `✓ chocolatey enabled`, `config.json` lo deja `enabled: true` y sale con 0
-- AND `um providers disable chocolatey` imprime `✓ chocolatey disabled` y lo deja `enabled: false`
-- AND `um providers foo` imprime `Unknown action: foo`
+- THEN se ve `┌   Providers `, `│` y `◆  chocolatey enabled`; `config.json` lo deja `enabled: true` y sale con 0
+- AND `um providers disable chocolatey` dibuja `┌   Providers `, `│` y `◆  chocolatey disabled`, y lo deja `enabled: false`
+- AND `um providers foo` dibuja `┌   Providers `, `│` y `■  Unknown action: foo`, no toca `config.json` y sale con 0
 
 ### Ignorar y dejar de ignorar paquetes
 
 - GIVEN ningún paquete ignorado y sin TTY
 - WHEN `um ignore Smoke.Test > out.txt`
-- THEN `out.txt` contiene `✓ Smoke.Test added to ignore list`, `config.json` lo añade a `ignoredPackages` y sale con 0
+- THEN `out.txt` contiene `┌   Ignored packages `, `│` y `◆  Smoke.Test added to ignore list`, sin escapes; `config.json` lo añade a `ignoredPackages` y sale con 0
 - WHEN después `um ignored > out.txt`
-- THEN `out.txt` contiene una vacía, `Ignored packages:`, una vacía, `  • Smoke.Test` y una vacía
+- THEN `out.txt` contiene `┌   Ignored packages `, `│`, `│  • Smoke.Test` y `└`, sin escapes
 - WHEN después `um unignore Smoke.Test > out.txt`
-- THEN `out.txt` contiene `✓ Smoke.Test removed from ignore list` y `ignoredPackages` ya no lo lleva
-- AND `um ignored` sin paquetes ignorados imprime `No packages ignored`
-- AND `um ignore` sin id imprime `Usage: um ignore <package-id>` y `Example: um ignore Google.GooglePlayGames`; `um unignore` sin id, `Usage: um unignore <package-id>`
+- THEN `out.txt` contiene `┌   Ignored packages `, `│` y `◆  Smoke.Test removed from ignore list`, y `ignoredPackages` ya no lo lleva
+- AND `um ignored` sin paquetes ignorados dibuja `┌   Ignored packages `, `│` y `●  No packages ignored`
+- AND `um ignore` sin id dibuja `┌   Ignored packages `, `│`, `■  Usage: um ignore <package-id>` y `│  Example: um ignore Google.GooglePlayGames`; `um unignore` sin id, `┌   Ignored packages `, `│` y `■  Usage: um unignore <package-id>`; los dos salen con 0 sin tocar `config.json`
+- AND en una terminal se ven las mismas líneas, con el `•` y el `Example:` atenuados

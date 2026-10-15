@@ -1,5 +1,4 @@
 #!/usr/bin/env bun
-import pc from "picocolors";
 import {
   loadConfig,
   toggleProvider,
@@ -15,6 +14,16 @@ import { providers, getAvailableProviders } from "./providers";
 import { commandExists, runCommand } from "./runner";
 import type { CheckFailure, CheckResult, PackageUpdate, UpdateProvider } from "./types";
 import { printCheckError, runCheckView } from "./ui/CheckApp";
+import {
+  IGNORED_TITLE,
+  printErrorLine,
+  printHelp,
+  printIgnored,
+  printNotice,
+  printProviders,
+  printProvidersNotice,
+  printText,
+} from "./ui/commands";
 import {
   printIntro,
   printLog,
@@ -64,12 +73,12 @@ async function main() {
   }
 
   if (command === "--version" || command === "-v") {
-    console.log(`um v${VERSION}`);
+    printText(`um v${VERSION}`);
     return;
   }
 
   if (command === "--help" || command === "-h") {
-    printHelp();
+    printHelp(VERSION);
     return;
   }
 
@@ -77,36 +86,9 @@ async function main() {
   await interactiveMode();
 }
 
-function printHelp() {
-  console.log(`
-${pc.bold("Update Manager")} v${VERSION}
-
-${pc.dim("Usage:")}
-  um                     Interactive mode
-  um check [provider]    Check for updates
-  um update [provider]   Update packages
-  um providers           Manage providers
-  um ignore <id>         Ignore a package
-  um unignore <id>       Stop ignoring a package
-  um ignored             List ignored packages
-
-${pc.dim("Options:")}
-  -y, --yes             Skip confirmation
-  -v, --version         Show version
-  -h, --help            Show help
-
-${pc.dim("Examples:")}
-  um check              Check all providers
-  um check winget       Check only WinGet
-  um update --yes       Update all without confirmation
-  um providers enable chocolatey
-  um ignore Google.GooglePlayGames
-`);
-}
-
 async function interactiveMode() {
   if (!isInteractive()) {
-    console.error("Interactive terminal required (see um --help)");
+    printErrorLine("Interactive terminal required (see um --help)");
     process.exitCode = 1;
     return;
   }
@@ -223,7 +205,7 @@ async function collectUpdates(): Promise<CheckResult> {
 async function updateCommand(providerId?: string, skipConfirm = false) {
   const interactive = isInteractive();
   if (!skipConfirm && !interactive) {
-    console.error("Interactive terminal required (use --yes)");
+    printErrorLine("Interactive terminal required (use --yes)");
     process.exitCode = 1;
     return;
   }
@@ -324,82 +306,72 @@ async function providersCommand(action?: string, providerId?: string) {
     const available = await getAvailableProviders();
     const availableIds = new Set(available.map((p) => p.id));
 
-    console.log(pc.bold("\nProviders:\n"));
-
-    for (const [id, provider] of Object.entries(providers)) {
-      const isEnabled = config.providers[id]?.enabled ?? false;
-      const isInstalled = availableIds.has(id);
-
-      const status = !isInstalled
-        ? pc.dim("not installed")
-        : isEnabled
-          ? pc.green("enabled")
-          : pc.dim("disabled");
-
-      console.log(`  ${provider.icon} ${provider.name.padEnd(20)} ${status}`);
-    }
-
-    console.log();
+    printProviders(
+      Object.entries(providers).map(([id, provider]) => ({
+        provider,
+        enabled: config.providers[id]?.enabled ?? false,
+        installed: availableIds.has(id),
+      }))
+    );
     return;
   }
 
   if (action === "enable" && providerId) {
     await toggleProvider(providerId, true);
-    console.log(pc.green(`✓ ${providerId} enabled`));
+    printProvidersNotice("success", `${providerId} enabled`);
     return;
   }
 
   if (action === "disable" && providerId) {
     await toggleProvider(providerId, false);
-    console.log(pc.dim(`✓ ${providerId} disabled`));
+    printProvidersNotice("success", `${providerId} disabled`);
     return;
   }
 
-  console.log(`Unknown action: ${action}`);
+  printProvidersNotice("error", `Unknown action: ${action}`);
 }
 
 async function ignoreCommand(packageId?: string) {
   if (!packageId) {
-    console.log(pc.red("Usage: um ignore <package-id>"));
-    console.log(pc.dim("Example: um ignore Google.GooglePlayGames"));
+    printNotice({
+      title: IGNORED_TITLE,
+      kind: "error",
+      text: "Usage: um ignore <package-id>",
+      hint: "Example: um ignore Google.GooglePlayGames",
+    });
     return;
   }
 
   await addIgnoredPackage(packageId);
-  console.log(pc.green(`✓ ${packageId} added to ignore list`));
+  printNotice({ title: IGNORED_TITLE, kind: "success", text: `${packageId} added to ignore list` });
 }
 
 async function unignoreCommand(packageId?: string) {
   if (!packageId) {
-    console.log(pc.red("Usage: um unignore <package-id>"));
+    printNotice({ title: IGNORED_TITLE, kind: "error", text: "Usage: um unignore <package-id>" });
     return;
   }
 
   await removeIgnoredPackage(packageId);
-  console.log(pc.green(`✓ ${packageId} removed from ignore list`));
+  printNotice({
+    title: IGNORED_TITLE,
+    kind: "success",
+    text: `${packageId} removed from ignore list`,
+  });
 }
 
 async function listIgnoredCommand() {
-  const ignored = await getIgnoredPackages();
-
-  if (ignored.length === 0) {
-    console.log(pc.dim("No packages ignored"));
-    return;
-  }
-
-  console.log(pc.bold("\nIgnored packages:\n"));
-  for (const pkg of ignored) {
-    console.log(`  ${pc.dim("•")} ${pkg}`);
-  }
-  console.log();
+  printIgnored(await getIgnoredPackages());
 }
 
 function cancel(): never {
-  console.log(pc.dim("\nCancelled"));
+  printOutro("Cancelled");
   process.exit(0);
 }
 
 // Handle Ctrl+C gracefully
 process.on("SIGINT", cancel);
 
-main().catch(console.error);
+main().catch((error) =>
+  printErrorLine(error instanceof Error ? (error.stack ?? String(error)) : String(error))
+);
