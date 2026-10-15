@@ -141,7 +141,9 @@ export function ErrorLine({ text, color = false }: { text: string; color?: boole
   );
 }
 
-const print = (node: ReactElement) => process.stdout.write(renderToString(node) + "\n");
+// Sin el ancho por defecto de 80 columnas, un id o un stack largos no se parten como no los partía console.log
+const toText = (node: ReactElement) => renderToString(node, { columns: Infinity }) + "\n";
+const print = (node: ReactElement) => process.stdout.write(toText(node));
 
 export const printText = (text: string) => print(<Text>{text}</Text>);
 export const printProviders = (rows: ProviderRow[]) => print(<ProviderList rows={rows} />);
@@ -154,6 +156,5 @@ export const printProvidersNotice = (kind: LogKind, text: string) =>
 export function printErrorLine(text: string): void {
   // El rojo solo si stderr es una terminal: `2> err.txt` queda sin escapes
   const node = <ErrorLine text={text} color={Boolean(process.stderr.isTTY)} />;
-  // Sin el ancho por defecto de 80 columnas, un stack largo no se parte a media ruta
-  process.stderr.write(renderToString(node, { columns: Infinity }) + "\n");
+  process.stderr.write(toText(node));
 }

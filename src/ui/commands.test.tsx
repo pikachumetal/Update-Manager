@@ -3,7 +3,15 @@ import { stripVTControlCharacters } from "node:util";
 import type { ReactElement } from "react";
 import { renderToString } from "ink";
 import { providers } from "../providers";
-import { ErrorLine, Help, IgnoredList, Notice, printErrorLine, ProviderList } from "./commands";
+import {
+  ErrorLine,
+  Help,
+  IgnoredList,
+  Notice,
+  printErrorLine,
+  printNotice,
+  ProviderList,
+} from "./commands";
 import type { ProviderRow } from "./menu";
 
 const lines = (node: ReactElement) =>
@@ -122,5 +130,14 @@ describe("commands", () => {
     const written = String(write.mock.calls[0][0]);
     write.mockRestore();
     expect(stripVTControlCharacters(written)).toBe(`■  ${text}\n`);
+  });
+
+  test("writes long notices to stdout without wrapping", () => {
+    const id = "Very.Long.Package.Identifier".repeat(4);
+    const write = spyOn(process.stdout, "write").mockImplementation(() => true);
+    printNotice({ title: "Ignored packages", kind: "success", text: `${id} added to ignore list` });
+    const written = String(write.mock.calls[0][0]);
+    write.mockRestore();
+    expect(stripVTControlCharacters(written)).toContain(`◆  ${id} added to ignore list\n`);
   });
 });
