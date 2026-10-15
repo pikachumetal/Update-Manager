@@ -48,7 +48,7 @@ Qué muestra `um check` y `um check <provider>`, con TTY y sin él, y cómo se c
 
 - GIVEN `um check` consultando, en una terminal interactiva
 - WHEN el usuario pulsa Ctrl+C
-- THEN se ve `Cancelled`, no se ve el resumen ni `└  Done`, y sale con código 0
+- THEN se ve `│` y `└  Cancelled`, no se ve el resumen ni `└  Done`, y sale con código 0
 
 ### Un provider que falla no tumba el check
 

@@ -48,12 +48,13 @@ qué muestra y qué hace `um` a secas: el menú, sus opciones, la salida, el com
 
 - GIVEN stdin sin TTY
 - WHEN `um < nul`
-- THEN se imprime `Interactive terminal required (see um --help)` por stderr, sin marco ni escapes, no se limpia la pantalla y sale con 1
-- AND lo mismo con stdout sin TTY (`um > out.txt`)
+- THEN stderr recibe una sola línea, `■  Interactive terminal required (see um --help)`, sin `┌`, `│` ni `└`; stdout queda vacío, no se limpia la pantalla y sale con 1
+- AND lo mismo con stdout sin TTY (`um > out.txt`): `out.txt` queda vacío
+- AND con `2> err.txt`, `err.txt` contiene esa línea sin escapes
 
 ### Ctrl+C cancela
 
 - GIVEN el menú, el select de provider o la lista de «Manage providers» esperando teclado
 - WHEN el usuario pulsa Ctrl+C
-- THEN se ve `Cancelled`, no se guarda nada en la config y sale con 0
-- AND dentro de las vistas de check y update, Ctrl+C se comporta como en `um check` y `um update` (`Cancelled`, código 0)
+- THEN se ve `│` y `└  Cancelled`, no se guarda nada en la config y sale con 0
+- AND dentro de las vistas de check y update, Ctrl+C se comporta como en `um check` y `um update` (`└  Cancelled`, código 0)

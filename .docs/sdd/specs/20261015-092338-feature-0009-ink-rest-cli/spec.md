@@ -3,7 +3,7 @@ id: 20261015-092338-feature-0009-ink-rest-cli
 feature: 0009
 title: Resto de la CLI en ink
 mode: lite
-status: approved
+status: done
 created: 2026-10-15
 author: Àngel Delgado (con Claude)
 approvers:
@@ -14,7 +14,7 @@ approvers:
 
 # Spec — Resto de la CLI en ink
 
-> **Estado**: approved.
+> **Estado**: done.
 > **Siguiente paso**: modo lite → implementación directa (Native).
 
 ## Capacidades
