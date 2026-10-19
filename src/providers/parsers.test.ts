@@ -320,7 +320,7 @@ describe("parseRustupCheckOutput", () => {
   test("lists rustup itself when it has an update", () => {
     const output = RUSTUP_CHECK.replace(
       "rustup - up to date : 1.29.1",
-      "rustup - update available: 1.29.1 -> 1.30.0"
+      "rustup - update available : 1.29.1 -> 1.30.0"
     );
     expect(parseRustupCheckOutput(output)[1]).toEqual({
       id: "rustup",
