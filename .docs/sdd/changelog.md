@@ -6,6 +6,7 @@ Formato: [Keep a Changelog 1.1.0](https://keepachangelog.com/). Changelog técni
 
 ### Added
 
+- **Feature 0010** — Providers `cargo` (crates de `cargo install`/`binstall`, con `cargo install-update -l`; actualiza con `cargo binstall -y` o `cargo install`; sin cargo-update avisa con `⚠`) y `rustup` (toolchains y el propio rustup, con `rustup check`). → [ref](specs/20261019-100523-feature-0010-cargo-provider/)
 - **Feature 0005** — Base de ink 8 (React 19.3.0, react-devtools-core 8.0.0): entry de render, marco calcado de @clack/prompts y Spinner propio; `bun build --compile` la empaqueta. → [ref](specs/20261008-150312-feature-0005-ink-base-check/)
 - **Feature 0001** — moon 2.6.0 orquesta los scripts de `package.json` (`:lint`, `:typecheck`, `:test`, `:build`, `:deps-update` con npm-check-updates interactivo…). → [ref](specs/20261006-120318-feature-0001-tooling-moon/)
 

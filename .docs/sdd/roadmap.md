@@ -9,6 +9,7 @@
 | 0006 | `um update` en ink: MultiSelect agrupado, Confirm de force/gsudo y progreso por paquete, tras 0005 · `proposal: 0004` | ✅ |
 | 0007 | Menú interactivo, `providers` e `ignore` en ink; fuera `@clack/prompts`, tras 0006 · `proposal: 0004` | ✅ |
 | 0009 | Resto de la CLI en ink con el marco de `src/ui/menu.tsx`: `providers` (y `enable`/`disable`), `ignore`, `unignore`, `ignored`, `--version`, `--help`, los avisos `Interactive terminal required…` y el `Cancelled` de Ctrl+C; sin TTY siguen funcionando, tras 0007 | ✅ |
+| 0010 | Providers `cargo` (crates con `cargo install-update -l`, update con binstall o `cargo install`) y `rustup` (toolchains y el propio rustup) | ✅ |
 | 0003 | Progress bars durante las actualizaciones (de B3) | ⏸️ aparcada: absorbida por la propuesta 0004 (feature 0006), 2026-10-08 |
 
 ## Backlog
@@ -46,6 +47,8 @@
 | `src/ui/` (feature 0006): colores del prompt no calcados de clack (`◼` verde, `│`/`└` cian con el prompt activo, `/` atenuado); dos componentes `Rail` con el mismo nombre (`UpdateApp.tsx`, `UpdateProgress.tsx`); pausas fijas de 250 ms en `UpdateApp.test.tsx` (~35 s la suite UI sola) | bajo: cosmético y lentitud de tests | **Esperar 2.º ticket** |
 | `src/ui/` (feature 0007): `lists only registered providers` (`menu.test.tsx`) prueba el mapeo 1:1, no el filtrado del registro (renombrar a `maps one option per row in order`); `PromptApp` con ~21 líneas; su efecto depende de `onDone` (una flecha nueva por render) y un re-render tras responder repite `onDone` y `exit()` | bajo: nombre engañoso y repetición sin efecto visible | **Esperar 2.º ticket** |
 | `src/ui/` (feature 0009): `menu.tsx` (`print`) y `CheckApp.tsx` (`printCheckError`) siguen partiendo a 80 columnas; el `■` de `printErrorLine` pierde el rojo con stdout redirigido (chalk decide por stdout); `ProviderStatus` (`commands.tsx`) duplica `ProviderState` (`menu.tsx`); `IGNORED_TITLE` exportado y repetido frente a `printProvidersNotice`; el handler de `main` imprime `stack` y pierde `cause` y los `errors` de un `AggregateError`; los `print*` sin test propio salvo `printNotice` y `printErrorLine` | bajo: líneas largas raras y cosmético | **Esperar 2.º ticket** |
+| `um check`: un provider cuyo `checkUpdates` lanza sale igualmente como `<icono> <nombre> ✓` (`collectUpdates` lo cuenta como consultado); visto con Cargo sin cargo-update en la feature 0010 | medio: el ✓ contradice el `⚠` de stderr | **Actuar**: feature (decidir qué se muestra) |
+| Providers `cargo`/`rustup` (feature 0010): `(unknown version)` de un toolchain sale como `(unknown`; crates de git ignorados; `rustup self update` con 60 s; `runCommand` solo mata `cmd.exe` al agotar el timeout (`cargo install` huérfano, común a todos los providers) | bajo: casos raros o previos | **Esperar 2.º ticket** |
 | TypeScript sigue en 6.0.3: `typescript-eslint` 8.71.1 exige `typescript <6.1.0` y bloquea pasar a TS 7 | bajo: sin impacto en `um`; se pierde el compilador nativo de TS 7 | **Esperar 2.º ticket**: a que `typescript-eslint` admita TS 7 |
 
 ## Patches

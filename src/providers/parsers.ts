@@ -241,6 +241,37 @@ export function parseBunOutdatedOutput(output: string): ParsedPackage[] {
 }
 
 /**
+ * Parse `cargo install-update -l` (crate cargo-update)
+ * Example row: mergiraf        v0.20.0    v0.21.0  Yes
+ */
+export function parseCargoInstallUpdateOutput(output: string): ParsedPackage[] {
+  const updates: ParsedPackage[] = [];
+  for (const line of output.split("\n")) {
+    const match = line.trim().match(/^(\S+)\s+v(\S+)\s+v(\S+)\s+Yes$/);
+    if (!match) continue;
+    const [, name, currentVersion, newVersion] = match;
+    updates.push({ id: name, name, currentVersion, newVersion, status: "available" });
+  }
+  return updates;
+}
+
+/**
+ * Parse `rustup check`
+ * Example: stable-x86_64-pc-windows-msvc - update available: 1.98.0 (88d9e12ae 2026-08-18) -> 1.99.1 (58cf8f9c3 2026-10-13)
+ * La línea del propio rustup lleva un espacio antes de los dos puntos: rustup - update available : 1.29.1 -> 1.30.0
+ */
+export function parseRustupCheckOutput(output: string): ParsedPackage[] {
+  const updates: ParsedPackage[] = [];
+  for (const line of output.split("\n")) {
+    const match = line.trim().match(/^(\S+) - update available ?: (\S+).*-> (\S+)/);
+    if (!match) continue;
+    const [, name, currentVersion, newVersion] = match;
+    updates.push({ id: name, name, currentVersion, newVersion, status: "available" });
+  }
+  return updates;
+}
+
+/**
  * Parse npm/pnpm outdated JSON output
  */
 export function parseNpmJsonOutput(output: string, _provider: string): ParsedPackage[] {

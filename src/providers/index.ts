@@ -9,6 +9,8 @@ import { PnpmProvider } from "./pnpm";
 import { PsModulesProvider } from "./psmodules";
 import { ChocolateyProvider } from "./chocolatey";
 import { ScoopProvider } from "./scoop";
+import { CargoProvider } from "./cargo";
+import { RustupProvider } from "./rustup";
 
 export const providers: Record<string, UpdateProvider> = {
   winget: new WingetProvider(),
@@ -21,6 +23,8 @@ export const providers: Record<string, UpdateProvider> = {
   psmodules: new PsModulesProvider(),
   chocolatey: new ChocolateyProvider(),
   scoop: new ScoopProvider(),
+  cargo: new CargoProvider(),
+  rustup: new RustupProvider(),
 };
 
 export async function getAvailableProviders(): Promise<UpdateProvider[]> {
@@ -50,4 +54,6 @@ export {
   PsModulesProvider,
   ChocolateyProvider,
   ScoopProvider,
+  CargoProvider,
+  RustupProvider,
 };

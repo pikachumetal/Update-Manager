@@ -102,10 +102,25 @@ Qué muestra y qué hace `um update` y `um update <provider>`: la consulta, la s
 - WHEN el usuario pulsa Ctrl+C
 - THEN se ve `│` y `└  Cancelled`, no se ve `●  Result:` ni `└  Done`, y sale con código 0
 
+### Actualizar crates y toolchains
+
+- GIVEN `mergiraf` 0.20.0 → 0.21.0 seleccionado y `cargo-binstall` en el `PATH`
+- WHEN se actualiza
+- THEN se ejecuta `cargo binstall -y mergiraf`, y con éxito su fila pasa a `│  ✓ mergiraf 0.20.0 → 0.21.0`
+- GIVEN el mismo crate sin `cargo-binstall` en el `PATH`
+- WHEN se actualiza
+- THEN se ejecuta `cargo install mergiraf`
+- GIVEN `stable-x86_64-pc-windows-msvc` 1.98.0 → 1.99.1 seleccionado
+- WHEN se actualiza
+- THEN se ejecuta `rustup update stable-x86_64-pc-windows-msvc --no-self-update`
+- GIVEN la fila `rustup` 1.29.1 → 1.30.0 seleccionada
+- WHEN se actualiza
+- THEN se ejecuta `rustup self update`
+
 ## Reglas de la capacidad
 
 - **Dónde viven los datos**: el estado de cada paquete lo da el gestor en cada ejecución. Cada update con éxito guarda `installedVersions[id]` en `~/.config/update-manager/config.json`, y un fallo no guarda nada.
 - **Idioma de los nombres**: mensajes al usuario en inglés; ids de provider en minúsculas y en inglés.
-- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 300 s un update de WinGet y 120 s la instalación de gsudo. Los paquetes se actualizan de uno en uno.
+- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 300 s un update de WinGet, 120 s la instalación de gsudo, 300 s un update con `cargo binstall`, 600 s con `cargo install` y 600 s `rustup update` de un toolchain. Los paquetes se actualizan de uno en uno.
 - **Avisos**: paquetes que necesitan force (`▲`), falta de `gsudo` (Confirm), y un provider que falla en `um update` sin provider (`⚠`, por stderr), sin parar el resto.
 - **Regla ante conflicto**: en `um update` sin provider, si la versión nueva coincide con `installedVersions[id]`, el paquete se omite. `um update <provider>` no aplica el filtro (deuda).
