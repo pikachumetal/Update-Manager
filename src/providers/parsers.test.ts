@@ -5,6 +5,8 @@ import {
   parseNpmJsonOutput,
   parsePnpmTableOutput,
   parsePsModulesOutput,
+  parseCargoInstallUpdateOutput,
+  parseRustupCheckOutput,
   isNewerVersion,
 } from "./parsers";
 
@@ -263,5 +265,75 @@ describe("isNewerVersion", () => {
     // In practice, unknown versions should trigger update
     expect(isNewerVersion("unknown", "1.0.0")).toBe(true);
     expect(isNewerVersion("1.0.0", "unknown")).toBe(false);
+  });
+});
+
+// Salida real de `cargo install-update -l` (2026-10-19)
+const CARGO_UP_TO_DATE = `    Polling registry 'https://index.crates.io/'...
+
+Package         Installed  Latest   Needs update
+cargo-binstall  v1.26.0    v1.26.0  No
+cargo-update    v22.1.1    v22.1.1  No
+mergiraf        v0.20.0    v0.20.0  No
+
+cargo-binstall contains removed executables (cargo-binstall), which will be re-installed on update — you can remove it with cargo uninstall cargo-binstall`;
+
+describe("parseCargoInstallUpdateOutput", () => {
+  test("returns nothing when every crate is up to date", () => {
+    expect(parseCargoInstallUpdateOutput(CARGO_UP_TO_DATE)).toEqual([]);
+  });
+
+  test("lists crates that need an update, without the v", () => {
+    const output = CARGO_UP_TO_DATE.replace(
+      "mergiraf        v0.20.0    v0.20.0  No",
+      "mergiraf        v0.20.0    v0.21.0  Yes"
+    );
+    expect(parseCargoInstallUpdateOutput(output)).toEqual([
+      {
+        id: "mergiraf",
+        name: "mergiraf",
+        currentVersion: "0.20.0",
+        newVersion: "0.21.0",
+        status: "available",
+      },
+    ]);
+  });
+});
+
+// Salida real de `rustup check` (2026-10-19), que sale con código 100
+const RUSTUP_CHECK = `stable-x86_64-pc-windows-msvc - update available: 1.98.0 (88d9e12ae 2026-08-18) -> 1.99.1 (58cf8f9c3 2026-10-13)
+rustup - up to date : 1.29.1`;
+
+describe("parseRustupCheckOutput", () => {
+  test("lists toolchains with an update, without hash or date", () => {
+    expect(parseRustupCheckOutput(RUSTUP_CHECK)).toEqual([
+      {
+        id: "stable-x86_64-pc-windows-msvc",
+        name: "stable-x86_64-pc-windows-msvc",
+        currentVersion: "1.98.0",
+        newVersion: "1.99.1",
+        status: "available",
+      },
+    ]);
+  });
+
+  test("lists rustup itself when it has an update", () => {
+    const output = RUSTUP_CHECK.replace(
+      "rustup - up to date : 1.29.1",
+      "rustup - update available: 1.29.1 -> 1.30.0"
+    );
+    expect(parseRustupCheckOutput(output)[1]).toEqual({
+      id: "rustup",
+      name: "rustup",
+      currentVersion: "1.29.1",
+      newVersion: "1.30.0",
+      status: "available",
+    });
+  });
+
+  test("returns nothing without recognizable lines", () => {
+    expect(
+      parseRustupCheckOutput("stable-x86_64-pc-windows-msvc - up to date : 1.99.1\nerror: network")
+    ).toEqual([]);
   });
 });

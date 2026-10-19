@@ -19,7 +19,7 @@ src/
     ├── base.ts            BaseProvider: updateAll genérico y createUpdate
     ├── parsers.ts         Parsers puros de la salida de cada gestor + isNewerVersion
     ├── parsers.test.ts    Tests de bun para los parsers
-    └── <gestor>.ts        Un provider por gestor: winget, proto, moonrepo, psmodules, bun, npm, pnpm, claude, chocolatey, scoop
+    └── <gestor>.ts        Un provider por gestor: winget, proto, moonrepo, psmodules, bun, npm, pnpm, claude, chocolatey, scoop, cargo, rustup
 ```
 
 ## Piezas y responsabilidades
@@ -48,6 +48,8 @@ Comandos reales de cada provider (los que verifica el código):
 | claude | `claude --version` + registry de npm | `claude update` |
 | chocolatey | `choco outdated -r` | `choco upgrade` |
 | scoop | `scoop update` + `scoop status` | `scoop update <pkg>` |
+| cargo | `cargo install-update -l` (crate cargo-update; si falta, el check lanza su aviso) | `cargo binstall -y <crate>`; sin cargo-binstall, `cargo install <crate>` |
+| rustup | `rustup check` (sale con 100 si hay updates) | `rustup update <toolchain> --no-self-update`; la fila `rustup`, `rustup self update` |
 
 ## Flujo principal
 

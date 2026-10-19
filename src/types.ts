@@ -77,4 +77,6 @@ export const DEFAULT_PROVIDERS: Record<string, ProviderConfig> = {
   claude: { enabled: true },
   chocolatey: { enabled: false },
   scoop: { enabled: false },
+  cargo: { enabled: true },
+  rustup: { enabled: true },
 };
