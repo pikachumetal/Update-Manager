@@ -1,0 +1,28 @@
+# Changelog — update-manager
+
+Formato: [Keep a Changelog 1.1.0](https://keepachangelog.com/). Changelog técnico del proyecto, backward-looking: `roadmap.md` es el forward-looking.
+
+## [Unreleased]
+
+## [1.6.0] - 2026-10-19
+
+### Added
+
+- **Feature 0010** — Providers `cargo` (crates de `cargo install`/`binstall`, con `cargo install-update -l`; actualiza con `cargo binstall -y` o `cargo install`; sin cargo-update avisa con `⚠`) y `rustup` (toolchains y el propio rustup, con `rustup check`). → [ref](specs/20261019-100523-feature-0010-cargo-provider/)
+- **Feature 0005** — Base de ink 8 (React 19.3.0, react-devtools-core 8.0.0): entry de render, marco calcado de @clack/prompts y Spinner propio; `bun build --compile` la empaqueta. → [ref](specs/20261008-150312-feature-0005-ink-base-check/)
+- **Feature 0001** — moon 2.6.0 orquesta los scripts de `package.json` (`:lint`, `:typecheck`, `:test`, `:build`, `:deps-update` con npm-check-updates interactivo…). → [ref](specs/20261006-120318-feature-0001-tooling-moon/)
+
+### Changed
+
+- **Patch 0011** — `um --version` y la cabecera de `um --help` muestran la versión de `package.json` en lugar de `0.1.0`. → [ref](specs/20261019-121024-patch-0011-version-from-package/)
+- **Feature 0009** — `um providers` (y `enable`/`disable`), `ignore`, `unignore`, `ignored`, `--help`, los avisos `Interactive terminal required…` (stderr, código 1), el `Cancelled` de Ctrl+C y el error inesperado se dibujan con el marco de ink; mismo contenido, y sin TTY sin escapes. `--version` sigue en una línea. → [ref](specs/20261015-092338-feature-0009-ink-rest-cli/)
+- **Patch 0008** — En la selección de `um update`, los paquetes de WinGet `pinned` y `unknown` empiezan desmarcados: Enter sin tocarlos no los fuerza. → [ref](specs/20261015-074853-patch-0008-winget-force-unchecked/)
+- **Feature 0007** — `um` a secas se dibuja con ink: menú con Select propio, «Update by provider» y «Manage providers» (lista de marcar propia, con al menos un provider marcado). Cada opción monta la vista de su comando (`um check`, `um update`, `um update <provider>`). Sin TTY sale con 1 y `Interactive terminal required (see um --help)`; Ctrl+C en el menú imprime `Cancelled` y sale con 0. → [ref](specs/20261008-165945-feature-0007-ink-menu-providers-ignore/)
+- **Feature 0006** — `um update` y `um update <provider>` se dibujan con ink: selección agrupada por provider con todo marcado, Confirm propio para force y gsudo, una fila de progreso por paquete (`updating`, `queued`, `✓`, `✗`) y el resultado. Sin TTY y sin `--yes` sale con 1 y `Interactive terminal required (use --yes)`; con `--yes` y sin TTY no pregunta force ni gsudo y salta los `pinned`/`unknown`. El menú interactivo sigue en @clack/prompts. Absorbe la 0003. → [ref](specs/20261008-175953-feature-0006-ink-update/)
+- **Feature 0005** — `um check` y `um check <provider>` se dibujan con ink: mismo contenido; sin TTY (`um check > out.txt`) solo se escribe el resultado final, sin frames del spinner; el error de un provider que lanza en `check <provider>` se imprime y el proceso termina en vez de quedarse colgado. → [ref](specs/20261008-150312-feature-0005-ink-base-check/)
+- **Feature 0001** — Solo Bun (`bunfig.toml`), versiones exactas, todas las dependencias al día (TypeScript 6.0.3, ESLint 10, @clack/prompts 1.8.1), Prettier a 2 espacios y LF y README reescrito en inglés. → [ref](specs/20261006-120318-feature-0001-tooling-moon/)
+
+### Removed
+
+- **Feature 0007** — `@clack/prompts` y el código que dibujaba con él (`checkAllProviders`, `displayUpdates`, `selectUpdates`, `performUpdates`…). → [ref](specs/20261008-165945-feature-0007-ink-menu-providers-ignore/)
+- **Feature 0001** — Sonar, configuración de IDE, workflows de `.github/`, `PLANNING.md`, los scripts `format` y `sonar`, y `engines.node`. → [ref](specs/20261006-120318-feature-0001-tooling-moon/)

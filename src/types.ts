@@ -30,6 +30,17 @@ export interface PackageUpdate {
   notes?: string;
 }
 
+export interface CheckFailure {
+  providerName: string;
+  message: string;
+}
+
+export interface CheckResult {
+  updates: PackageUpdate[];
+  checkedProviders: string[];
+  failures: CheckFailure[];
+}
+
 export interface UpdateResult {
   success: boolean;
   updated: string[];
@@ -39,6 +50,7 @@ export interface UpdateResult {
 
 export interface UpdateOptions {
   force?: boolean;
+  interactive?: boolean;
 }
 
 export interface UpdateProvider {
@@ -65,4 +77,6 @@ export const DEFAULT_PROVIDERS: Record<string, ProviderConfig> = {
   claude: { enabled: true },
   chocolatey: { enabled: false },
   scoop: { enabled: false },
+  cargo: { enabled: true },
+  rustup: { enabled: true },
 };

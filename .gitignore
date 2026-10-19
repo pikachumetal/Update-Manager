@@ -7,12 +7,6 @@ dist/
 out/
 *.tgz
 
-# User config files (generated at runtime)
-projects.json
-tools.json
-recents.json
-settings.json
-
 # Code coverage
 coverage/
 *.lcov
@@ -29,6 +23,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # Caches
 .eslintcache
+.moon/cache/
 .cache/
 *.tsbuildinfo
 
@@ -47,6 +42,7 @@ Desktop.ini
 # Bun
 bun.lockb
 
-# SonarQube
-.scannerwork/
-.sonar/
+# SDD kit y herramientas del agente
+.playwright-mcp/
+.superpowers/
+.docs/sdd/sdd-kit.local.json

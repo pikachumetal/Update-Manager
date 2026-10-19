@@ -55,10 +55,7 @@ export async function getEnabledProviders(): Promise<string[]> {
     .map(([key]) => key);
 }
 
-export async function toggleProvider(
-  id: string,
-  enabled: boolean
-): Promise<void> {
+export async function toggleProvider(id: string, enabled: boolean): Promise<void> {
   const config = await loadConfig();
 
   if (!config.providers[id]) {
@@ -70,9 +67,7 @@ export async function toggleProvider(
   await saveConfig(config);
 }
 
-export async function getProviderConfig(
-  id: string
-): Promise<ProviderConfig | undefined> {
+export async function getProviderConfig(id: string): Promise<ProviderConfig | undefined> {
   const config = await loadConfig();
   return config.providers[id];
 }

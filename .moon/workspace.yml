@@ -1,0 +1,6 @@
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+projects:
+  update-manager: '.'
+
+defaultProject: 'update-manager'

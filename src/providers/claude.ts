@@ -26,9 +26,7 @@ export class ClaudeProvider extends BaseProvider {
     }
 
     if (isNewerVersion(currentVersion, latestVersion)) {
-      return [
-        this.createUpdate("claude", "Claude CLI", currentVersion, latestVersion),
-      ];
+      return [this.createUpdate("claude", "Claude CLI", currentVersion, latestVersion)];
     }
 
     return [];
@@ -51,7 +49,7 @@ export class ClaudeProvider extends BaseProvider {
       if (!response.ok) {
         return null;
       }
-      const data = await response.json() as { "dist-tags"?: { latest?: string } };
+      const data = (await response.json()) as { "dist-tags"?: { latest?: string } };
       return data["dist-tags"]?.latest ?? null;
     } catch {
       return null;

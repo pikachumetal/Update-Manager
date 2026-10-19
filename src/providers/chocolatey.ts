@@ -40,10 +40,9 @@ export class ChocolateyProvider extends BaseProvider {
   }
 
   async updatePackage(packageId: string, _options?: unknown): Promise<boolean> {
-    const result = await runCommand(
-      ["choco", "upgrade", packageId, "-y", "--no-progress"],
-      { timeout: 300000 }
-    );
+    const result = await runCommand(["choco", "upgrade", packageId, "-y", "--no-progress"], {
+      timeout: 300000,
+    });
     return result.success;
   }
 
@@ -53,10 +52,9 @@ export class ChocolateyProvider extends BaseProvider {
     failed: string[];
     skipped: string[];
   }> {
-    const result = await runCommand(
-      ["choco", "upgrade", "all", "-y", "--no-progress"],
-      { timeout: 600000 }
-    );
+    const result = await runCommand(["choco", "upgrade", "all", "-y", "--no-progress"], {
+      timeout: 600000,
+    });
 
     return {
       success: result.success,

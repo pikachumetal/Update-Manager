@@ -1,0 +1,40 @@
+# Tech Stack — update-manager
+
+## Tecnologías
+
+| Pieza | Tecnología | Versión |
+| --- | --- | --- |
+| Runtime, gestor de paquetes y test runner | Bun (`.prototools`; `packageManager` y `engines.bun` alineados) | 1.4.3 |
+| Orquestación de tareas | moon (`.prototools`, `.moon/workspace.yml`, `moon.yml`) | 2.6.2 |
+| Lenguaje | TypeScript (`strict`, `moduleResolution: bundler`) | 6.0.3 |
+| UI de terminal | ink (React para terminal) + React, con prompts propios en `src/ui/`; `react-devtools-core` porque `bun build --compile` la exige con ink. Toda la CLI dibuja con ink ([`update-check`](capabilities/update-check.md), [`package-update`](capabilities/package-update.md), [`interactive-menu`](capabilities/interactive-menu.md), [`settings`](capabilities/settings.md), [`cli-common`](capabilities/cli-common.md)); las salidas estáticas se escriben con `renderToString` | 8.0.0 / 19.3.0 / 8.0.0 |
+| Colores | picocolors | 1.1.1 |
+| Validación de la config | zod | 4.6.5 |
+| Lint | ESLint (flat config) + @typescript-eslint | 10.12.0 / 8.71.1 |
+| Formato | Prettier (2 espacios, LF, como `.editorconfig`) | 3.9.9 |
+| Actualizador de dependencias | npm-check-updates | 23.1.0 |
+| Plataforma | Windows (`cmd.exe /c`, `where`, `pwsh`, `gsudo`) | Windows 11 |
+| Distribución | Desde el código fuente con `bun link` (binarios `um` y `update-manager`, `bin/cli.js` con shebang `bun`); el paquete `@pikachu-metal/update-manager` no está en npm | 1.5.0 |
+
+- **Solo Bun**: `bunfig.toml` lleva `[run] bun = true`, así que `eslint`, `prettier` y `tsc` corren con Bun aunque su shebang diga `node`. No hay `engines.node`. `@types/node` sí es devDep, porque son los tipos de la API de Node que implementa Bun, y `bun-types` la pide con `*`.
+- **Versiones exactas**: `package.json` no lleva `^` ni `~`, y `bunfig.toml` (`[install] exact = true`) hace que `bun add` también fije la versión exacta. Se suben a mano con `moon run :deps-update`.
+- **TypeScript se queda en 6**: `typescript-eslint` 8.71.1 exige `typescript <6.1.0`. Está en la deuda técnica del roadmap.
+
+## Comandos
+
+Cada tarea de moon ejecuta su script de `package.json` con `bun run`:
+
+- **Arrancar**: `moon run :start` (o `:dev`, en modo watch). Instalado: `um`.
+- **Tests**: `moon run :test` (`:test-coverage` para cobertura).
+- **Build**: `moon run :build`, que compila `bin/update-manager.exe` y lo copia a `bin/um.exe` (en `.gitignore`).
+- **Calidad**: `moon run :lint` (`prettier --check` + `eslint src`), `:lint-fix` y `:typecheck` (`tsc --noEmit`).
+- **Dependencias**: `moon run :deps-update`, que lanza `ncu --interactive --format group`.
+- **Instalación local**: `moon run :link`.
+
+## Testing
+
+TDD con `bun test` para la lógica pura y la vista de ink (`src/ui/*.test.tsx`, con `renderToString` de ink, sin `ink-testing-library`; los prompts se prueban con el stdin falso de `src/ui/testStdin.ts`, y entre teclas que montan otro prompt hay que esperar ~250 ms, porque ink tarda en suscribir el `useInput` de un componente montado de forma asíncrona y la tecla anterior se pierde; con la CPU cargada esas pausas rebasan el tope de 5 s de `bun test`, y `--timeout 30000` separa el timeout del fallo real. `renderToString` parte a 80 columnas si no recibe `columns`: lo que sustituye a un `console.log` pasa `{ columns: Infinity }`. Prettier colapsa los espacios repetidos del texto JSX: un literal como `└  …` va como expresión de cadena): los parsers de salida de cada gestor viven en `src/providers/parsers.ts` y se prueban en `src/providers/parsers.test.ts`. La parte que lanza procesos (`runCommand`, `updatePackage`, el flujo de `index.ts`) no tiene tests. Se verifica con smoke manual: `um check` y, si el cambio toca actualizaciones, `um update <provider>` en la máquina real. No hay CI.
+
+## Decisiones abiertas
+
+_Ninguna._
