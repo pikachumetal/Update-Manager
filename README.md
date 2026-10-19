@@ -9,7 +9,7 @@ This README is for people who install and use `um`. To work on the code, see [De
 You need:
 
 - Windows 10 or 11.
-- [Bun](https://bun.sh) 1.4.2 or later. If you use [proto](https://moonrepo.dev/proto), run `proto install` in the repository to get the pinned versions of Bun and moon.
+- [Bun](https://bun.sh) 1.4.3 or later. If you use [proto](https://moonrepo.dev/proto), run `proto install` in the repository to get the pinned versions of Bun and moon.
 - Optional: [gsudo](https://github.com/gerardog/gsudo), to force updates of pinned WinGet packages with admin rights. If it's missing, `um` offers to install it.
 
 ## Install

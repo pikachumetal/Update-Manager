@@ -4,8 +4,8 @@
 
 | Pieza | Tecnología | Versión |
 | --- | --- | --- |
-| Runtime, gestor de paquetes y test runner | Bun (`.prototools`; `packageManager` y `engines.bun` alineados) | 1.4.2 |
-| Orquestación de tareas | moon (`.prototools`, `.moon/workspace.yml`, `moon.yml`) | 2.6.0 |
+| Runtime, gestor de paquetes y test runner | Bun (`.prototools`; `packageManager` y `engines.bun` alineados) | 1.4.3 |
+| Orquestación de tareas | moon (`.prototools`, `.moon/workspace.yml`, `moon.yml`) | 2.6.2 |
 | Lenguaje | TypeScript (`strict`, `moduleResolution: bundler`) | 6.0.3 |
 | UI de terminal | ink (React para terminal) + React, con prompts propios en `src/ui/`; `react-devtools-core` porque `bun build --compile` la exige con ink. Toda la CLI dibuja con ink ([`update-check`](capabilities/update-check.md), [`package-update`](capabilities/package-update.md), [`interactive-menu`](capabilities/interactive-menu.md), [`settings`](capabilities/settings.md), [`cli-common`](capabilities/cli-common.md)); las salidas estáticas se escriben con `renderToString` | 8.0.0 / 19.3.0 / 8.0.0 |
 | Colores | picocolors | 1.1.1 |
