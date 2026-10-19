@@ -7,7 +7,7 @@ solution: dev-lead
 status: done
 created: 2026-10-19
 branch: patch/0011-version-from-package
-commit: <hash>
+commit: 3f303f9
 ---
 
 # Patch 0011 — `um --version` lee la versión de package.json
@@ -41,6 +41,8 @@ Fila de deuda: «`VERSION = "0.1.0"` hardcodeado en `src/index.ts`, mientras `pa
 | 2 | `.\bin\um.exe --version` → `um v1.5.0`; `.\bin\um.exe --help` → `┌   Update Manager v1.5.0` | ✅ ejecución real (binario compilado) |
 | 3 | `moon run :lint :typecheck --force` | ✅ |
 | 4 | `bun test` | ✅ 99/101; los 2 rojos son `parseProtoOutput`, deuda conocida |
+
+Validado: 2026-10-19 · «Validado: lo he probado y funciona» · no detalló qué probó
 
 ## 5. Tiempo (ligero)
 

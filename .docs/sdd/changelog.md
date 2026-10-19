@@ -12,6 +12,7 @@ Formato: [Keep a Changelog 1.1.0](https://keepachangelog.com/). Changelog técni
 
 ### Changed
 
+- **Patch 0011** — `um --version` y la cabecera de `um --help` muestran la versión de `package.json` en lugar de `0.1.0`. → [ref](specs/20261019-121024-patch-0011-version-from-package/)
 - **Feature 0009** — `um providers` (y `enable`/`disable`), `ignore`, `unignore`, `ignored`, `--help`, los avisos `Interactive terminal required…` (stderr, código 1), el `Cancelled` de Ctrl+C y el error inesperado se dibujan con el marco de ink; mismo contenido, y sin TTY sin escapes. `--version` sigue en una línea. → [ref](specs/20261015-092338-feature-0009-ink-rest-cli/)
 - **Patch 0008** — En la selección de `um update`, los paquetes de WinGet `pinned` y `unknown` empiezan desmarcados: Enter sin tocarlos no los fuerza. → [ref](specs/20261015-074853-patch-0008-winget-force-unchecked/)
 - **Feature 0007** — `um` a secas se dibuja con ink: menú con Select propio, «Update by provider» y «Manage providers» (lista de marcar propia, con al menos un provider marcado). Cada opción monta la vista de su comando (`um check`, `um update`, `um update <provider>`). Sin TTY sale con 1 y `Interactive terminal required (see um --help)`; Ctrl+C en el menú imprime `Cancelled` y sale con 0. → [ref](specs/20261008-165945-feature-0007-ink-menu-providers-ignore/)
