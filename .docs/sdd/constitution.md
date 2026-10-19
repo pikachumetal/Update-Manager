@@ -16,7 +16,7 @@
 ## Convenciones
 
 - **Idioma**: código e identificadores en inglés. Los mensajes de la CLI y el README, en inglés. Los docs de `.docs/sdd/`, en español.
-- **Ramas**: gitflow. `main` estable, `develop` de integración, `feature/<id>-<slug>` y `patch/<id>-<slug>` desde `develop`. Las releases salen en `release/vX.Y.Z` y los hotfix en `hotfix/vX.Y.Z`, con tag `vX.Y.Z` en `main`.
+- **Ramas**: gitflow. `main` estable, `develop` de integración, `feature/<id>-<slug>` y `patch/<id>-<slug>` desde `develop`. Las releases salen en `release/vX.Y.Z` y los hotfix en `hotfix/vX.Y.Z`, con tag `vX.Y.Z` en `main`. Cada tag lleva su GitHub Release: título `vX.Y.Z`, notas con la sección del changelog de esa versión y `bin/um.exe` adjunto, creada con la cuenta `pikachumetal` de `gh` (la activa por defecto puede ser otra).
 - **Commits**: Conventional Commits. Tipo y scope en inglés; título y cuerpo en español, con los términos técnicos en inglés. Ejemplo: `fix(winget): reintentar sin --silent cuando el instalador lo rechaza`. El historial anterior a SDD mezcla mensajes libres en inglés y en español.
 - **Proyecto de referencia**: no aplica.
 
