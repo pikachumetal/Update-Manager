@@ -34,8 +34,7 @@ import {
   type MenuAction,
 } from "./ui/menu";
 import { runUpdateView, type UpdateViewOptions } from "./ui/UpdateApp";
-
-const VERSION = "0.1.0";
+import { version as VERSION } from "../package.json";
 
 async function main() {
   const args = process.argv.slice(2);
