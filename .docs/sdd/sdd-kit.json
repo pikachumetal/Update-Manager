@@ -2,13 +2,28 @@
   "version": "2.3.3",
   "channel": "plugin",
   "updated": "2026-10-08",
-  "ids": { "mode": "sequence" },
+  "ids": {
+    "mode": "sequence"
+  },
   "control": {
     "profile": "delegate",
     "maxParallelAgents": 3,
-    "silence": { "betweenStepsMinutes": 8, "longCommandMinutes": 20 }
+    "silence": {
+      "betweenStepsMinutes": 8,
+      "longCommandMinutes": 20
+    }
   },
-  "merge": { "into": "develop", "noFf": true, "removeWorktree": false, "push": true },
+  "merge": {
+    "into": "develop",
+    "noFf": true,
+    "removeWorktree": false,
+    "push": true
+  },
   "execution": "auto",
-  "validation": { "mode": "manual" }
+  "validation": {
+    "mode": "manual"
+  },
+  "release": {
+    "hasRecipient": false
+  }
 }

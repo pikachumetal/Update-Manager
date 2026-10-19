@@ -77,3 +77,7 @@ Validación diferida: 2026-10-15 · «Diferir: lo pruebo en el próximo `um upda
 - WHEN `um update`
 - THEN `Foo.Pinned` y `Foo.Unknown` empiezan en `◻`, y `Git.Git` y `left-pad` en `◼`
 - AND Enter sin tocar nada actualiza `Git.Git` y salta `left-pad`; para forzar `Foo.Pinned`, el usuario la marca con espacio
+
+## Adendas
+
+- 2026-10-19 — Validado en el cierre de la release v1.6.0: «Sí, funciona» · no detalló qué probó. Sale de las validaciones diferidas.

@@ -4,6 +4,8 @@ Formato: [Keep a Changelog 1.1.0](https://keepachangelog.com/). Changelog técni
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-19
+
 ### Added
 
 - **Feature 0010** — Providers `cargo` (crates de `cargo install`/`binstall`, con `cargo install-update -l`; actualiza con `cargo binstall -y` o `cargo install`; sin cargo-update avisa con `⚠`) y `rustup` (toolchains y el propio rustup, con `rustup check`). → [ref](specs/20261019-100523-feature-0010-cargo-provider/)
