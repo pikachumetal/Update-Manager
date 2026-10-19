@@ -8,15 +8,15 @@
 
 ### Versión
 
-- GIVEN cualquier estado
+- GIVEN `package.json` con `"version": "1.5.0"`
 - WHEN `um --version` (o `um -v`)
-- THEN se imprime una sola línea, `um v0.1.0`, sin marco ni escapes, también en una terminal, y sale con 0
+- THEN se imprime una sola línea, `um v1.5.0`, sin marco ni escapes, también en una terminal, y sale con 0
 
 ### Ayuda
 
-- GIVEN cualquier estado
+- GIVEN `package.json` con `"version": "1.5.0"`
 - WHEN `um --help` (o `um -h`)
-- THEN se ve `┌   Update Manager v0.1.0 `, `│`, `│  Usage:` y las 7 filas de uso de hoy con el raíl delante (`│    um                     Interactive mode` … `│    um ignored             List ignored packages`), `│`, `│  Options:` y sus 3 filas (`│    -y, --yes             Skip confirmation`, `│    -v, --version         Show version`, `│    -h, --help            Show help`), `│`, `│  Examples:` y sus 5 filas (`│    um check              Check all providers` … `│    um ignore Google.GooglePlayGames`), y `└`; sale con 0
+- THEN se ve `┌   Update Manager v1.5.0 `, `│`, `│  Usage:` y las 7 filas de uso de hoy con el raíl delante (`│    um                     Interactive mode` … `│    um ignored             List ignored packages`), `│`, `│  Options:` y sus 3 filas (`│    -y, --yes             Skip confirmation`, `│    -v, --version         Show version`, `│    -h, --help            Show help`), `│`, `│  Examples:` y sus 5 filas (`│    um check              Check all providers` … `│    um ignore Google.GooglePlayGames`), y `└`; sale con 0
 - AND con `um --help > out.txt`, `out.txt` contiene las mismas líneas sin escapes
 
 ### Error inesperado

@@ -10,6 +10,7 @@
 | 2026-10-15 | 0008 | patch | 0.25 | 0.3 | 1.2 | — | — | — | — | 20261015-074853-patch-0008-winget-force-unchecked |
 | 2026-10-15 | 0009 | frontend | 1 | 0.65 | 0.65 | 13676k | 461k | — | sin precio | 20261015-092338-feature-0009-ink-rest-cli |
 | 2026-10-19 | 0010 | backend | 1 | 0.25 | 0.25 | 11599k | 414k | no aplica | sin precio | 20261019-100523-feature-0010-cargo-provider |
+| 2026-10-19 | 0011 | patch | — | 0.1 | — | — | — | — | — | 20261019-121024-patch-0011-version-from-package |
 
 **Factor de calibración** (ratio mediano real/estimado, 7 artefactos): **0.25** · media 0.56
 

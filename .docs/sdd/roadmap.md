@@ -29,7 +29,7 @@
 | `loadConfig` (`src/config.ts`) devuelve los defaults en silencio si `config.json` no valida, y el siguiente `saveConfig` lo sobrescribe | alto: se pierden `ignoredPackages` e `installedVersions` sin aviso | **Actuar**: feature (regla de aviso nueva) |
 | `check <provider>` y `update <provider>` (`src/index.ts`) no filtran `ignoredPackages` ni `installedVersions`; el filtro solo vive en `checkAllProviders` | medio: reaparecen los paquetes ignorados y los de versión mal etiquetada | **Actuar**: patch |
 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** `tsc --noEmit`: 4 errores. `UpdateOptions.interactive` no existe (`winget.ts:54`, `winget.ts:66`); `$` sin usar (`runner.ts:1`); `provider` sin usar (`parsers.ts:239`) | medio: el typecheck no pasa y la rama de modo interactivo de WinGet nunca se activa | **Actuar**: patch |
-| `VERSION = "0.1.0"` hardcodeado en `src/index.ts`, mientras `package.json` va por la 1.5.0 | bajo: `um --version` miente | **Actuar**: patch |
+| **[Patch 0011, 2026-10-19: saldada — [patch](specs/20261019-121024-patch-0011-version-from-package/patch.md)]** `VERSION = "0.1.0"` hardcodeado en `src/index.ts`, mientras `package.json` va por la 1.5.0 | bajo: `um --version` miente | **Actuar**: patch |
 | **[Feature 0001, 2026-10-06: parcial — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md); queda: `updateAll()`, `requiresAdmin` y `parseTableOutput`]** Código sin uso: `updateAll()` en `BaseProvider` y en 9 providers, `requiresAdmin`, `parseTableOutput` (`runner.ts`) y los path aliases `@update-manager/*` (`tsconfig.json`) | bajo: confunde al leer, no rompe nada | **Actuar**: patch |
 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** `format:check` falla en 18 ficheros | bajo: depende de B1 | **Esperar 2.º ticket**: tras decidir B1 |
 | **[Feature 0001, 2026-10-06: saldada — [walkthrough](specs/20261006-120318-feature-0001-tooling-moon/walkthrough.md)]** `bun run lint`: 15 warnings (vars sin usar, `any`). El script usa `--ext`, que ESLint 9 con flat config ignora | bajo | **Actuar**: patch |
@@ -56,5 +56,6 @@
 | Fecha | Id | Descripción |
 | --- | --- | --- |
 | 2026-10-15 | 0008 | 🧪 validación diferida a próximo `um update` con un pinned de WinGet, a cargo del dev-lead — WinGet `pinned` y `unknown` salen desmarcados en la selección de `um update` · [patch](specs/20261015-074853-patch-0008-winget-force-unchecked/patch.md) |
+| 2026-10-19 | 0011 | `um --version` y `--help` leen la versión de `package.json` · [patch](specs/20261019-121024-patch-0011-version-from-package/patch.md) |
 
 ## Releases cerradas
