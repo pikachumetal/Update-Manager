@@ -57,10 +57,31 @@ Qué muestra `um check` y `um check <provider>`, con TTY y sin él, y cómo se c
 - THEN stderr recibe `  ⚠ pnpm (global): boom`
 - AND stdout lista Bun con su update y `📦 pnpm (global) ✓`, como hoy, y acaba en `└  Done`
 
+### Crates de cargo y toolchains de rustup
+
+- GIVEN `cargo install-update -l` lista `mergiraf  v0.20.0  v0.21.0  Yes` y `cargo-binstall  v1.26.0  v1.26.0  No`
+- WHEN `um check`
+- THEN se ve `🦀 Cargo` con `   • mergiraf 0.20.0 → 0.21.0`, y `cargo-binstall` no sale
+- GIVEN `rustup check` escribe `stable-x86_64-pc-windows-msvc - update available: 1.98.0 (88d9e12ae 2026-08-18) -> 1.99.1 (58cf8f9c3 2026-10-13)` y `rustup - up to date : 1.29.1`, y sale con código 100
+- WHEN `um check`
+- THEN se ve `🔧 Rustup` con `   • stable-x86_64-pc-windows-msvc 1.98.0 → 1.99.1`, y `rustup` no sale
+- GIVEN `rustup check` escribe `rustup - update available : 1.29.1 -> 1.30.0` (con espacio antes de los dos puntos, como `rustup - up to date : 1.29.1`)
+- WHEN `um check`
+- THEN `🔧 Rustup` lleva `   • rustup 1.29.1 → 1.30.0`
+- GIVEN todo al día en los dos
+- WHEN `um check`
+- THEN se ve `🦀 Cargo ✓` y `🔧 Rustup ✓`
+
+### Aviso si falta cargo-update
+
+- GIVEN `cargo` en el `PATH` y `cargo-install-update` no
+- WHEN `um check`
+- THEN stderr recibe `  ⚠ Cargo: cargo-update not installed: cargo binstall cargo-update`, no se instala nada, y los demás providers, `Rustup` incluido, se listan como siempre
+
 ## Reglas de la capacidad
 
 - **Dónde viven los datos**: el estado de cada paquete lo da el gestor en cada ejecución. `um check` solo guarda `lastCheck` en `~/.config/update-manager/config.json`.
 - **Idioma de los nombres**: mensajes al usuario en inglés; ids de provider en minúsculas y en inglés.
-- **Límites**: 60 s por comando por defecto y 120 s el check de WinGet.
-- **Avisos**: fallo de check de un provider (`⚠`, por stderr), y se sigue con el resto.
+- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 120 s el check de cargo y 30 s `rustup check`.
+- **Avisos**: fallo de check de un provider (`⚠`, por stderr), y se sigue con el resto. Cargo sin cargo-update es uno de esos fallos.
 - **Regla ante conflicto**: en `um check` sin provider, si la versión nueva coincide con `installedVersions[id]`, el paquete se omite. `um check <provider>` no aplica el filtro (deuda).

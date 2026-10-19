@@ -3,7 +3,7 @@ id: 20261019-100523-feature-0010-cargo-provider
 feature: 0010
 title: Providers cargo y rustup
 mode: lite
-status: approved
+status: done
 created: 2026-10-19
 author: Àngel Delgado (con Claude)
 approvers:
@@ -14,7 +14,7 @@ approvers:
 
 # Spec — Providers cargo y rustup
 
-> **Estado**: approved.
+> **Estado**: done.
 > **Siguiente paso**: modo lite → implementación directa (Native).
 
 ## Capacidades
@@ -69,7 +69,7 @@ Dos providers con el molde `BaseProvider` + parser puro en `parsers.ts`, como `m
 - GIVEN `rustup check` escribe `stable-x86_64-pc-windows-msvc - update available: 1.98.0 (88d9e12ae 2026-08-18) -> 1.99.1 (58cf8f9c3 2026-10-13)` y `rustup - up to date : 1.29.1`, y sale con código 100
 - WHEN `um check`
 - THEN se ve `🔧 Rustup` con `   • stable-x86_64-pc-windows-msvc 1.98.0 → 1.99.1`, y `rustup` no sale
-- GIVEN `rustup check` escribe `rustup - update available: 1.29.1 -> 1.30.0`
+- GIVEN `rustup check` escribe `rustup - update available : 1.29.1 -> 1.30.0` (con espacio antes de los dos puntos, como `rustup - up to date : 1.29.1`)
 - WHEN `um check`
 - THEN `🔧 Rustup` lleva `   • rustup 1.29.1 → 1.30.0`
 - GIVEN todo al día en los dos
@@ -114,7 +114,7 @@ Dos providers con el molde `BaseProvider` + parser puro en `parsers.ts`, como `m
 
 ## Enmiendas
 
-_Ninguna._
+- 2026-10-19 — El GIVEN de la fila `rustup` pasa de `rustup - update available: 1.29.1 -> 1.30.0` a `rustup - update available : 1.29.1 -> 1.30.0`; el THEN no cambia — la revisión final vio que rustup escribe su propia línea con espacio antes de los dos puntos (como el `up to date : 1.29.1` de la salida real) y el parser no la reconocía — aprobada: «Validado: lo he probado y funciona» (2026-10-19)
 
 ## Aprobaciones
 

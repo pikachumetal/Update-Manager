@@ -9,25 +9,27 @@
 | 2026-10-08 | 0006 | frontend | 3 | 0.7 | 0.23 | 37779k | 2772k | — | sin precio | 20261008-175953-feature-0006-ink-update |
 | 2026-10-15 | 0008 | patch | 0.25 | 0.3 | 1.2 | — | — | — | — | 20261015-074853-patch-0008-winget-force-unchecked |
 | 2026-10-15 | 0009 | frontend | 1 | 0.65 | 0.65 | 13676k | 461k | — | sin precio | 20261015-092338-feature-0009-ink-rest-cli |
+| 2026-10-19 | 0010 | backend | 1 | 0.25 | 0.25 | 11599k | 414k | no aplica | sin precio | 20261019-100523-feature-0010-cargo-provider |
 
-**Factor de calibración** (ratio mediano real/estimado, 6 artefactos): **0.44** · media 0.62
+**Factor de calibración** (ratio mediano real/estimado, 7 artefactos): **0.25** · media 0.56
 
-- p25–p75: 0.2–1.06
-- p80: 1.2 — para comprometer una fecha, multiplica la estimación por el p80: así cubre 4 de cada 5 artefactos.
-- Dentro de ±25 %: 33 % · sobreestimadas: 67 % · infraestimadas: 0 %
-- Error absoluto (h): media 1.45 · mediana 1.33
+- p25–p75: 0.21–0.93
+- p80: 1.09 — para comprometer una fecha, multiplica la estimación por el p80: así cubre 4 de cada 5 artefactos.
+- Dentro de ±25 %: 29 % · sobreestimadas: 71 % · infraestimadas: 0 %
+- Error absoluto (h): media 1.35 · mediana 0.75
 - Tendencia: n insuficiente (hacen falta 20)
 
 | Tramo del ratio | n | % |
 | --- | --- | --- |
-| <0.5 | 3 | 50 % |
-| 0.5–0.8 | 1 | 17 % |
-| 0.8–1.25 | 1 | 17 % |
-| 1.25–2 | 1 | 17 % |
+| <0.5 | 4 | 57 % |
+| 0.5–0.8 | 1 | 14 % |
+| 0.8–1.25 | 1 | 14 % |
+| 1.25–2 | 1 | 14 % |
 | ≥2 | 0 | 0 % |
 
 | Tipo | n | Mediana | p25–p75 |
 | --- | --- | --- | --- |
+| backend | 1 | 0.25 | — |
 | frontend | 3 | 0.65 | — |
 | infra/tooling | 2 | 0.18 | — |
 | patch | 1 | 1.2 | — |
