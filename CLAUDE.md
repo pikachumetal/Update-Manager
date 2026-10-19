@@ -22,3 +22,4 @@ CLI interactiva (Bun + TypeScript) que consulta y aplica actualizaciones de vari
 - Un parser nuevo va en `src/providers/parsers.ts`, con su test en `parsers.test.ts` y una salida real como fixture.
 - Nada de refactor oportunista: la deuda se salda desde la tabla del roadmap, en su propio patch.
 - Gitflow: se trabaja desde `develop`. `main` y los tags los mueve una persona.
+- Cada vez que se sube `main` con un tag `vX.Y.Z`, se crea su GitHub Release con las notas de esa versión del changelog y `bin/um.exe` adjunto, usando la cuenta `pikachumetal` de `gh` (`GH_TOKEN=$(gh auth token --user pikachumetal)`). Detalle en `constitution.md`, «Ramas».
