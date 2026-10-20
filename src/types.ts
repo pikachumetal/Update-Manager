@@ -74,7 +74,7 @@ export const DEFAULT_PROVIDERS: Record<string, ProviderConfig> = {
   bun: { enabled: true },
   npm: { enabled: true },
   pnpm: { enabled: true },
-  claude: { enabled: true },
+  agents: { enabled: true },
   chocolatey: { enabled: false },
   scoop: { enabled: false },
   cargo: { enabled: true },

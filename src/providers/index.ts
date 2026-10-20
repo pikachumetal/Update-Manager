@@ -2,7 +2,7 @@ import type { UpdateProvider } from "../types";
 import { WingetProvider } from "./winget";
 import { ProtoProvider } from "./proto";
 import { MoonrepoProvider } from "./moonrepo";
-import { ClaudeProvider } from "./claude";
+import { AgentsProvider } from "./agents";
 import { BunProvider } from "./bun";
 import { NpmProvider } from "./npm";
 import { PnpmProvider } from "./pnpm";
@@ -16,7 +16,7 @@ export const providers: Record<string, UpdateProvider> = {
   winget: new WingetProvider(),
   proto: new ProtoProvider(),
   moonrepo: new MoonrepoProvider(),
-  claude: new ClaudeProvider(),
+  agents: new AgentsProvider(),
   bun: new BunProvider(),
   npm: new NpmProvider(),
   pnpm: new PnpmProvider(),
@@ -47,7 +47,7 @@ export {
   WingetProvider,
   ProtoProvider,
   MoonrepoProvider,
-  ClaudeProvider,
+  AgentsProvider,
   BunProvider,
   NpmProvider,
   PnpmProvider,

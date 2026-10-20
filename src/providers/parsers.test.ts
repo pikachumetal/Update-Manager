@@ -7,6 +7,8 @@ import {
   parsePsModulesOutput,
   parseCargoInstallUpdateOutput,
   parseRustupCheckOutput,
+  parseFirstVersion,
+  parseAgyChangelogLatest,
   isNewerVersion,
 } from "./parsers";
 
@@ -335,5 +337,34 @@ describe("parseRustupCheckOutput", () => {
     expect(
       parseRustupCheckOutput("stable-x86_64-pc-windows-msvc - up to date : 1.99.1\nerror: network")
     ).toEqual([]);
+  });
+});
+
+describe("parseFirstVersion", () => {
+  // Salidas reales de `--version` (2026-10-20)
+  test("reads the version of each agent", () => {
+    expect(parseFirstVersion("2.1.304 (Claude Code)")).toBe("2.1.304");
+    expect(parseFirstVersion("1.3.5")).toBe("1.3.5");
+    expect(parseFirstVersion("codex-cli 0.162.0")).toBe("0.162.0");
+  });
+
+  test("returns null without a version", () => {
+    expect(parseFirstVersion("command not found")).toBeNull();
+  });
+});
+
+describe("parseAgyChangelogLatest", () => {
+  test("takes the first version heading of agy changelog", () => {
+    // Principio real de `agy changelog` (2026-10-20), recortado
+    const output = `1.4.3:
+· Added \`/\` search to the \`/diff\` file list and file view.
+· Fixed the agent failing to create empty files such as __init__.py in 1.4.2.
+1.4.2:
+· Fixed something.`;
+    expect(parseAgyChangelogLatest(output)).toBe("1.4.3");
+  });
+
+  test("returns null without a version heading", () => {
+    expect(parseAgyChangelogLatest("· no headings here 1.2.3")).toBeNull();
   });
 });

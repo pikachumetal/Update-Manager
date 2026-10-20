@@ -19,7 +19,7 @@ src/
     ├── base.ts            BaseProvider: updateAll genérico y createUpdate
     ├── parsers.ts         Parsers puros de la salida de cada gestor + isNewerVersion
     ├── parsers.test.ts    Tests de bun para los parsers
-    └── <gestor>.ts        Un provider por gestor: winget, proto, moonrepo, psmodules, bun, npm, pnpm, claude, chocolatey, scoop, cargo, rustup
+    └── <gestor>.ts        Un provider por gestor: winget, proto, moonrepo, psmodules, bun, npm, pnpm, agents, chocolatey, scoop, cargo, rustup
 ```
 
 ## Piezas y responsabilidades
@@ -32,7 +32,7 @@ src/
 | `src/runner.ts` | Ejecutar comandos externos con timeout (60 s por defecto) y `FORCE_COLOR=0` | Bun.spawn, `cmd.exe`, `pwsh`, `where` |
 | `src/providers/*.ts` | Por gestor: `isAvailable` (comando en el `PATH`), `checkUpdates` (comando + parser), `updatePackage` | `runner`, `parsers`, `base` |
 | `src/providers/parsers.ts` | Convertir la salida de texto o JSON en `ParsedPackage[]`. Chocolatey y Scoop parsean dentro de su propio provider | — |
-| `src/providers/claude.ts` | Versión local con `claude --version`, última versión del registry de npm (`fetch`), update con `claude update` | registry.npmjs.org |
+| `src/providers/agents.ts` | Una fila por agente instalado (claude, agy, codex): versión local con `<agente> --version`, última versión del registry de npm (`fetch`) o de `agy changelog`, update con `<agente> update` | registry.npmjs.org |
 
 Comandos reales de cada provider (los que verifica el código):
 
@@ -45,7 +45,7 @@ Comandos reales de cada provider (los que verifica el código):
 | bun | `bun outdated -g` | `bun update -g <pkg>`; el propio bun, con `bun upgrade` |
 | npm | `npm outdated -g --json` | `npm update -g <pkg>` |
 | pnpm | `pnpm outdated -g --json`; si no parsea, la tabla | `pnpm update -g <pkg>` |
-| claude | `claude --version` + registry de npm | `claude update` |
+| agents | `<agente> --version` + registry de npm (claude, codex) o `agy changelog` (agy) | `claude update`, `agy update`, `codex update` |
 | chocolatey | `choco outdated -r` | `choco upgrade` |
 | scoop | `scoop update` + `scoop status` | `scoop update <pkg>` |
 | cargo | `cargo install-update -l` (crate cargo-update; si falta, el check lanza su aviso) | `cargo binstall -y <crate>`; sin cargo-binstall, `cargo install <crate>` |
