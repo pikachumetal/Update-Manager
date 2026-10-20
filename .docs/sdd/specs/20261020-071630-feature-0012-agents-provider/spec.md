@@ -3,7 +3,7 @@ id: 20261020-071630-feature-0012-agents-provider
 feature: 0012
 title: Provider de agentes (claude, agy, codex)
 mode: lite
-status: approved
+status: done
 created: 2026-10-20
 author: Àngel Delgado (con Claude)
 approvers:
@@ -14,7 +14,7 @@ approvers:
 
 # Spec — Provider de agentes (claude, agy, codex)
 
-> **Estado**: approved.
+> **Estado**: done.
 > **Siguiente paso**: modo lite → implementación directa (Native).
 
 ## Capacidades

@@ -4,6 +4,10 @@ Formato: [Keep a Changelog 1.1.0](https://keepachangelog.com/). Changelog técni
 
 ## [Unreleased]
 
+### Changed
+
+- **Feature 0012** — El provider `claude` (`🤖 Claude CLI`) pasa a `agents` (`🤖 AI agents`): una fila por agente instalado (claude, agy, codex), con la última versión del registry de npm o de `agy changelog`, y update con `<agente> update`. `um check claude` y `um update claude` dejan de existir. → [ref](specs/20261020-071630-feature-0012-agents-provider/)
+
 ## [1.6.0] - 2026-10-19
 
 ### Added
