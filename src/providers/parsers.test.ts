@@ -364,6 +364,10 @@ describe("parseAgyChangelogLatest", () => {
     expect(parseAgyChangelogLatest(output)).toBe("1.4.3");
   });
 
+  test("accepts text after the version heading", () => {
+    expect(parseAgyChangelogLatest("1.4.3: hotfix\n· Fixed something.")).toBe("1.4.3");
+  });
+
   test("returns null without a version heading", () => {
     expect(parseAgyChangelogLatest("· no headings here 1.2.3")).toBeNull();
   });

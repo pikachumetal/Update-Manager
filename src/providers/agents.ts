@@ -11,10 +11,13 @@ interface Agent {
 
 async function npmLatest(pkg: string): Promise<string | null> {
   try {
-    const response = await fetch(`https://registry.npmjs.org/${pkg}`);
+    // /latest trae solo la versión publicada (el documento completo de @openai/codex pesa ~18 MB)
+    const response = await fetch(`https://registry.npmjs.org/${pkg}/latest`, {
+      signal: AbortSignal.timeout(10000),
+    });
     if (!response.ok) return null;
-    const data = (await response.json()) as { "dist-tags"?: { latest?: string } };
-    return data["dist-tags"]?.latest ?? null;
+    const data = (await response.json()) as { version?: string };
+    return data.version ?? null;
   } catch {
     return null;
   }

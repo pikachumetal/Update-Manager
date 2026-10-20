@@ -282,7 +282,7 @@ export function parseFirstVersion(output: string): string | null {
  * Latest version in `agy changelog`: the first line that is a version heading ("1.4.3:")
  */
 export function parseAgyChangelogLatest(output: string): string | null {
-  return output.match(/^(\d+\.\d+\.\d+):\s*$/m)?.[1] ?? null;
+  return output.match(/^(\d+\.\d+\.\d+):/m)?.[1] ?? null;
 }
 
 /**
