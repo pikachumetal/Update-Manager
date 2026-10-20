@@ -1,6 +1,6 @@
 # Update Manager
 
-`um` checks every package manager on your Windows machine for updates and applies the ones you pick, from one interactive terminal UI. It covers WinGet, proto, moon, PowerShell modules, global Bun, npm, and pnpm packages, and the Claude CLI.
+`um` checks every package manager on your Windows machine for updates and applies the ones you pick, from one interactive terminal UI. It covers WinGet, proto, moon, PowerShell modules, global Bun, npm, and pnpm packages, Rust crates and toolchains, and AI coding agents (Claude Code, agy, Codex).
 
 This README is for people who install and use `um`. To work on the code, see [Develop](#develop).
 
@@ -75,9 +75,11 @@ um update winget
 | `bun` | Bun global packages | Yes |
 | `npm` | npm global packages | Yes |
 | `pnpm` | pnpm global packages | Yes |
-| `claude` | Claude CLI | Yes |
+| `agents` | AI coding agents: Claude Code, agy, and Codex, each with its own `update` command | Yes |
 | `chocolatey` | Chocolatey | No |
 | `scoop` | Scoop | No |
+| `cargo` | Rust crates installed with `cargo install` or `cargo binstall` (needs `cargo-update`) | Yes |
+| `rustup` | Rust toolchains and rustup itself | Yes |
 
 ## Hide apps that update themselves
 

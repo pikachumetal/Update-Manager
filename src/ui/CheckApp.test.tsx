@@ -21,7 +21,7 @@ const railway: PackageUpdate = {
   status: "available",
 };
 
-const upToDate = ["proto", "moonrepo", "psmodules", "npm", "pnpm", "claude"];
+const upToDate = ["proto", "moonrepo", "psmodules", "npm", "pnpm", "agents"];
 
 const withIntro = (doneMessage: string, result: CheckResult) => (
   <>
@@ -54,7 +54,7 @@ describe("CheckReport", () => {
       "💠 PowerShell Modules ✓",
       "📦 npm (global) ✓",
       "📦 pnpm (global) ✓",
-      "🤖 Claude CLI ✓",
+      "🤖 AI agents ✓",
       "",
       "│",
       "●  Summary: 1 available",

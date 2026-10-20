@@ -272,6 +272,20 @@ export function parseRustupCheckOutput(output: string): ParsedPackage[] {
 }
 
 /**
+ * First X.Y.Z of a `--version` output, e.g. "codex-cli 0.162.0" → "0.162.0"
+ */
+export function parseFirstVersion(output: string): string | null {
+  return output.match(/(\d+\.\d+\.\d+)/)?.[1] ?? null;
+}
+
+/**
+ * Latest version in `agy changelog`: the first line that is a version heading ("1.4.3:")
+ */
+export function parseAgyChangelogLatest(output: string): string | null {
+  return output.match(/^(\d+\.\d+\.\d+):/m)?.[1] ?? null;
+}
+
+/**
  * Parse npm/pnpm outdated JSON output
  */
 export function parseNpmJsonOutput(output: string, _provider: string): ParsedPackage[] {

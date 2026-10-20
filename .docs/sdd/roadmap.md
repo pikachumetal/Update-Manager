@@ -4,6 +4,7 @@
 
 | # | Ítem | Estado |
 | --- | --- | --- |
+| 0012 | Provider `agents` (`🤖 AI agents`): claude, agy y codex instalados, con su `update`; sustituye a `claude` | ✅ |
 | 0003 | Progress bars durante las actualizaciones (de B3) | ⏸️ aparcada: absorbida por la propuesta 0004 (feature 0006), 2026-10-08 |
 
 ## Backlog
@@ -24,7 +25,7 @@
 | Chocolatey y Scoop parsean dentro de su provider, fuera de `parsers.ts` y sin tests | bajo: los dos providers están desactivados por defecto | **Esperar 2.º ticket** |
 | No hay CI de tests ni de typecheck: `.github/workflows/` solo lanza Claude Code | medio: los rojos de arriba llegaron a `develop` sin aviso | **Esperar 2.º ticket** |
 | `src/index.ts` concentra 557 líneas: comandos, menús, render y flujo de force | bajo: crece con cada comando | **Esperar 2.º ticket** |
-| `um check` no lista WinGet (ni con updates ni con ✓) en la máquina del autor; igual en `develop` antes de la 0001 | medio: el provider principal no aparece | **Actuar**: patch (investigar `isAvailable` / `checkUpdates` de winget) |
+| `um check` no lista WinGet (ni con updates ni con ✓) en la máquina del autor; igual en `develop` antes de la 0001. Re-medido el 2026-10-20 ([walkthrough 0012](specs/20261020-071630-feature-0012-agents-provider/walkthrough.md)): `um check` sí lista WinGet con sus updates | bajo: no se reproduce hoy | **Esperar 2.º ticket**: si vuelve a fallar |
 | `um update --yes` (sin provider) toma `--yes` como provider y falla con `Provider "--yes" not found` (`src/index.ts`, `updateCommand(args[1], …)`); `printHelp` lo anuncia | medio: el ejemplo de la ayuda no funciona | **Actuar**: patch |
 | pnpm: `um check` muestra un update `[WARN] Using → skips`. Causa: `pnpm outdated -g --json` escribe `[WARN] Using --global skips…` antes del JSON, `parseNpmJsonOutput` falla el `JSON.parse` y devuelve `[]`, y `pnpm.ts` recurre a `parsePnpmTableOutput`, que toma la línea como paquete. Fix: `parseNpmJsonOutput` parsea desde el primer `{` | bajo: ruido en la salida | **Actuar**: patch 0002, tras la 0001 |
 | Provider de proto: parsea la tabla de texto (corta `3.14.8+20261003` a `3.14.8+202`; con un agente en el entorno proto 0.62 escribe NDJSON, de ahí los 2 tests en rojo de `parseProtoOutput`) y actualiza con `proto install <tool>`, que no instala un `newest_version` con sufijo de build (python exige `proto install python 3 --pin`) | medio: proto lista updates que `um` no sabe aplicar | **Actuar**: feature (pasar a `proto outdated --json` y decidir la semántica de instalación y `--pin`) |

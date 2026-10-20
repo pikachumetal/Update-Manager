@@ -15,7 +15,7 @@ En Windows, mantener al día un equipo de desarrollo obliga a recorrer varios ge
 
 ## Dominio (lenguaje del proyecto)
 
-- **Provider**: adaptador a un gestor de paquetes (`winget`, `proto`, `moonrepo`, `psmodules`, `bun`, `npm`, `pnpm`, `claude`, `chocolatey`, `scoop`). Implementa `UpdateProvider` (`src/types.ts`), normalmente heredando de `BaseProvider`.
+- **Provider**: adaptador a un gestor de paquetes (`winget`, `proto`, `moonrepo`, `psmodules`, `bun`, `npm`, `pnpm`, `agents`, `chocolatey`, `scoop`, `cargo`, `rustup`). Implementa `UpdateProvider` (`src/types.ts`), normalmente heredando de `BaseProvider`.
 - **Provider activo / disponible**: activo = `enabled: true` en la config. Disponible = su comando existe en el `PATH` (`isAvailable()`). Solo se consultan los que están activos y disponibles.
 - **Update** (`PackageUpdate`): un paquete con versión actual y nueva, más su `status`.
 - **Status**: `available` (se actualiza), `pinned` (fijado en WinGet), `unknown` (versión actual desconocida), `error`. Los `pinned` y `unknown` solo se actualizan forzando, y forzar solo existe para WinGet.

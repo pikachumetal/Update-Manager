@@ -8,9 +8,9 @@ Qué muestra `um check` y `um check <provider>`, con TTY y sin él, y cómo se c
 
 ### Resultado agrupado por provider
 
-- GIVEN Bun con 1 update (`@railway/cli` 5.63.4 → 5.64.0) y Proto, Moonrepo, PowerShell Modules, npm, pnpm y Claude CLI al día
+- GIVEN Bun con 1 update (`@railway/cli` 5.63.4 → 5.64.0) y Proto, Moonrepo, PowerShell Modules, npm, pnpm y AI agents al día
 - WHEN `um check`
-- THEN la salida final, sin colores, son estas líneas en este orden: `┌   Checking for updates `, `│`, `◇  Found 1 update(s)`, una vacía, `🥟 Bun (global)`, `   • @railway/cli 5.63.4 → 5.64.0`, `🔧 Proto ✓`, `🌙 Moonrepo ✓`, `💠 PowerShell Modules ✓`, `📦 npm (global) ✓`, `📦 pnpm (global) ✓`, `🤖 Claude CLI ✓`, una vacía, `│`, `●  Summary: 1 available`, `│` y `└  Done`
+- THEN la salida final, sin colores, son estas líneas en este orden: `┌   Checking for updates `, `│`, `◇  Found 1 update(s)`, una vacía, `🥟 Bun (global)`, `   • @railway/cli 5.63.4 → 5.64.0`, `🔧 Proto ✓`, `🌙 Moonrepo ✓`, `💠 PowerShell Modules ✓`, `📦 npm (global) ✓`, `📦 pnpm (global) ✓`, `🤖 AI agents ✓`, una vacía, `│`, `●  Summary: 1 available`, `│` y `└  Done`
 - AND sale con código 0
 - GIVEN WinGet con 1 update `available` y 1 `pinned`, y npm con 1 `unknown`
 - WHEN `um check`
@@ -78,10 +78,25 @@ Qué muestra `um check` y `um check <provider>`, con TTY y sin él, y cómo se c
 - WHEN `um check`
 - THEN stderr recibe `  ⚠ Cargo: cargo-update not installed: cargo binstall cargo-update`, no se instala nada, y los demás providers, `Rustup` incluido, se listan como siempre
 
+### Agentes instalados
+
+- GIVEN claude 2.1.304 con 2.1.304 en npm, agy 1.3.5 con `agy changelog` empezando por `1.4.3:`, y codex `codex-cli 0.162.0` con 0.163.0 en npm
+- WHEN `um check agents`
+- THEN se ve `🤖 AI agents` con `   • agy 1.3.5 → 1.4.3` y `   • codex 0.162.0 → 0.163.0`, y `claude` no sale
+- GIVEN solo claude en el `PATH`, al día
+- WHEN `um check`
+- THEN se ve `🤖 AI agents ✓`, sin filas de agy ni codex
+- GIVEN ningún agente en el `PATH`
+- WHEN `um check`
+- THEN no sale `🤖 AI agents`
+- GIVEN un `config.json` con `providers.claude` y sin `providers.agents`
+- WHEN `um check claude`
+- THEN se ve `■  Provider "claude" not found`, y `um check` lista `🤖 AI agents` activo
+
 ## Reglas de la capacidad
 
 - **Dónde viven los datos**: el estado de cada paquete lo da el gestor en cada ejecución. `um check` solo guarda `lastCheck` en `~/.config/update-manager/config.json`.
 - **Idioma de los nombres**: mensajes al usuario en inglés; ids de provider en minúsculas y en inglés.
-- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 120 s el check de cargo y 30 s `rustup check`.
+- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 120 s el check de cargo, 30 s `rustup check`, 10 s el `--version` de cada agente y 30 s `agy changelog`.
 - **Avisos**: fallo de check de un provider (`⚠`, por stderr), y se sigue con el resto. Cargo sin cargo-update es uno de esos fallos.
 - **Regla ante conflicto**: en `um check` sin provider, si la versión nueva coincide con `installedVersions[id]`, el paquete se omite. `um check <provider>` no aplica el filtro (deuda).

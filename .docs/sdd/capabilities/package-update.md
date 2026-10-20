@@ -117,10 +117,22 @@ Qué muestra y qué hace `um update` y `um update <provider>`: la consulta, la s
 - WHEN se actualiza
 - THEN se ejecuta `rustup self update`
 
+### Actualizar agentes
+
+- GIVEN `agy` 1.3.5 → 1.4.3 seleccionado
+- WHEN se actualiza
+- THEN se ejecuta `agy update`, y con éxito su fila pasa a `│  ✓ agy 1.3.5 → 1.4.3`
+- GIVEN `codex` 0.162.0 → 0.163.0 seleccionado
+- WHEN se actualiza
+- THEN se ejecuta `codex update`
+- GIVEN `claude` con versión nueva, seleccionado
+- WHEN se actualiza
+- THEN se ejecuta `claude update`
+
 ## Reglas de la capacidad
 
 - **Dónde viven los datos**: el estado de cada paquete lo da el gestor en cada ejecución. Cada update con éxito guarda `installedVersions[id]` en `~/.config/update-manager/config.json`, y un fallo no guarda nada.
 - **Idioma de los nombres**: mensajes al usuario en inglés; ids de provider en minúsculas y en inglés.
-- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 300 s un update de WinGet, 120 s la instalación de gsudo, 300 s un update con `cargo binstall`, 600 s con `cargo install` y 600 s `rustup update` de un toolchain. Los paquetes se actualizan de uno en uno.
+- **Límites**: 60 s por comando por defecto, 120 s el check de WinGet, 300 s un update de WinGet, 120 s la instalación de gsudo, 300 s un update con `cargo binstall`, 600 s con `cargo install`, 600 s `rustup update` de un toolchain, 120 s `claude update` y 300 s `agy update` y `codex update`. Los paquetes se actualizan de uno en uno.
 - **Avisos**: paquetes que necesitan force (`▲`), falta de `gsudo` (Confirm), y un provider que falla en `um update` sin provider (`⚠`, por stderr), sin parar el resto.
 - **Regla ante conflicto**: en `um update` sin provider, si la versión nueva coincide con `installedVersions[id]`, el paquete se omite. `um update <provider>` no aplica el filtro (deuda).
